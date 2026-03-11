@@ -10,11 +10,6 @@ body,
   padding: 0;
 }
 
-body {
-  min-height: 100vh;
-  background-color: hsl(var(--b1));
-  color: hsl(var(--bc));
-}
 
 * {
   margin: 0;

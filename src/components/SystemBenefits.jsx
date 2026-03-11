@@ -27,8 +27,8 @@ const SystemBenefits = () => {
   return (
      <div className="w-full !pt-12 bg-white !pb-8 ">
           <h3 className="text-3xl font-bold text-center mb-2">System Benefits</h3>
-        <p className="text-gray-600 text-lg text-center !my-3">Designed with your convenience and security in mind</p>
-       <div className="w-full mt-10 grid grid-cols-1  lg:grid-cols-2 gap-8 gap-y-6 !px-12 !pt-6">
+        <p className="text-gray-600 text-lg text-center !px-2 !my-3">Designed with your convenience and security in mind</p>
+       <div className="w-full mt-10 grid grid-cols-1  lg:grid-cols-2 gap-8 gap-y-6 !px-4 lg:!px-12 !pt-6">
         {
             benefits.map((benefit, i) => (
                 <div className="flex gap-4 items-center justify-center !p-6  rounded-lg shadow-md group bg-white rounded-xl transition duration-500 hover:-translate-y-2 hover:shadow-xl">

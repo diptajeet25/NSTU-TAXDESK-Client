@@ -32,8 +32,8 @@ const HowITWorks = () => {
   return (
     <div className="w-full bg-gradient-to-b from-gray-50 to-white !pt-12 !pb-8 !mt-12">
       <h3 className="text-3xl font-bold text-center mb-2">How It Works</h3>
-      <p className="text-gray-600 text-lg text-center !my-3">Simple steps to get started with NSTU TAXDESK</p>
-      <div className="w-full mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 !px-8 !pt-6">
+      <p className="text-gray-600 text-lg text-center !px-2 !my-3">Simple steps to get started with NSTU TAXDESK</p>
+      <div className="w-full mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 !px-4 lg:!px-8 !pt-6">
         {steps.map((item) => {
           const Icon = item.icon;
           return (

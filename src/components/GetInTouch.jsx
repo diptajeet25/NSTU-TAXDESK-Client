@@ -23,8 +23,8 @@ const GetInTouch = () => {
   return (
      <div className="w-full bg-gradient-to-b from-gray-50 to-white !pt-12 !pb-8 !mt-12">
          <h3 className="text-3xl font-bold text-center mb-2">Get In Touch</h3>
-          <p className="text-gray-600 text-lg text-center !my-3">Have questions? We're here to help you with the NSTU Tax & VAT Payment System</p>
-          <div className="w-full mt-10 grid grid-cols-1  lg:grid-cols-2 gap-14 !px-8 !pt-6">
+          <p className="text-gray-600 text-lg text-center !px-2 !my-3">Have questions? We're here to help you with the NSTU Tax & VAT Payment System</p>
+          <div className="w-full mt-10 grid grid-cols-1  lg:grid-cols-2 gap-14 !px-4 lg:!px-8 !pt-6">
             <div >
 <h3 className="text-xl font-bold  !mb-2">Contact Information</h3>
 <p className="text-gray-600 text-md ">Reach out to us for any queries regarding tax calculations, payment issues, or technical support.</p>

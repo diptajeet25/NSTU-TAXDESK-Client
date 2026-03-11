@@ -5,7 +5,7 @@ import { Link } from 'react-router'
 function Navbar() {
   return (
 
-        <div className="max-w-7xl mx-auto flex justify-between items-center !px-2 !py-1 shadow-sm">
+        <div className="max-w-7xl mx-auto flex justify-between items-center !px-2 !py-1 !mb-0.5 sticky z-40 top-0 shadow-sm bg-white backdrop-blur-sm rounded-lg">
   <div className="flex-1 flex items-center gap-1">
    
     <img src={logo} alt="NSTU Logo" className="w-12 lg:w-14  h-12 lg:w-14 " />
