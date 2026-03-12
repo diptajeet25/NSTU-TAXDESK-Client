@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import logo from '../assets/nstu-logo.png'
 import { Link } from 'react-router'
+import { AuthContext } from '../Context/AuthContext'
 
 function Navbar() {
+  const {userDetails}=useContext(AuthContext);
+  console.log(userDetails);
   return (
 
         <div className="max-w-7xl mx-auto flex justify-between items-center !px-2 !py-1 !mb-0.5 sticky z-40 top-0 shadow-sm bg-white backdrop-blur-sm rounded-lg">
@@ -20,7 +23,7 @@ function Navbar() {
   </div>
   <div className="flex flex-1 gap-2 justify-end pr-4">
     <div  className="hidden lg:flex gap-3" >
-         <Link to="/signup" className="btn btn-outline btn-primary !px-5 !py-0">Sign Up</Link>
+         <Link to="/auth" className="btn btn-outline btn-primary !px-5 !py-0">Sign Up</Link>
 <Link to="/signin" className="btn btn-primary !px-5 !py-0">Sign In</Link>
     </div>
   

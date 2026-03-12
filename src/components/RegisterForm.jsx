@@ -2,25 +2,80 @@ import { CircleAlert, Eye, EyeOff, Shield } from 'lucide-react';
 import React, { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { AuthContext } from '../Context/AuthContext';
+import { sendEmailVerification, updateProfile } from 'firebase/auth';
+import { auth } from '../Firebase/firebase.init';
+import { useNavigate } from 'react-router';
+import useAxiosSecure from '../hooks/useAxiosSecure';
 
 const RegisterForm = () => {
     const {register, handleSubmit,getValues, formState: { errors }} = useForm();
-    const {user,createUser}=useContext(AuthContext);
+    const navigate=useNavigate();
+    const {user,setUser,createUser,userDetails,setUserDetails}=useContext(AuthContext);
       const [showPassword, setShowPassword] = useState(false);
+
       const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+      const axiosSecure=useAxiosSecure();
       const registerUser = (data)=>{
         console.log(data);
         const photo=data.photo[0];
         createUser(data.email,data.password)
-        .then(result=>
+        .then(async()=>
         {
-            console.log(result.user);
-        }
-        ).catch(error=> 
-        {
-            console.log(error);
-        })
-      }
+            setUser(auth.currentUser);
+            const formdata=new FormData();
+            formdata.append("image",photo);
+            const url=`https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_hosting_key}`;
+            const res=await fetch(url,{
+                method:"POST",
+                body:formdata
+            });
+            const imageData=await res.json();            
+            console.log(imageData);
+            const profile={
+                displayName:data.name,
+                photoURL:imageData.data.url
+            }
+            await updateProfile(auth.currentUser,profile)
+            console.log("Profile Updated");
+            const userInfo={
+                name:data.name,
+                photourl:imageData.data.url,
+                email:data.email,
+                designation:data.designation,
+                role:"user",
+                createdAt:new Date()
+            }
+            axiosSecure.post("/users",userInfo)
+            .then((res)=>
+            {
+                console.log(res.data);
+            }).catch(error=>
+            {                console.log(error);
+            });
+            
+            console.log(userInfo);
+            setUserDetails(userInfo);
+            console.log(userDetails);
+
+
+            await sendEmailVerification(auth.currentUser,{
+                url:`${window.location.origin}/dashboard`,
+                handleCodeInApp:false
+            }
+            );
+            navigate("/verify-email");
+   console.log("Verification Email Sent");
+    
+                
+                       
+                     
+            })
+    .catch(error=> 
+                {
+    console.log(error);
+                })
+          }
+      
   return (
     <div className='bg-white rounded-xl w-[90%] lg:w-[60%] !mx-auto !py-6 mt-10 flex flex-col items-start gap-3 shadow-md !px-4'>
         <h3 className="text-2xl font-bold  mb-2">Create Your Account</h3>
@@ -49,8 +104,8 @@ const RegisterForm = () => {
             <label className="font-bold !px-1">Designation</label>
             <select {...register("designation", { required: "Designation is required" })} className="rounded-lg w-[95%] bg-gray-200 border-black/10 !pl-2 !py-2">
                 <option value="">Select your Designation</option>
-                <option value="student">Teacher</option>
-                <option value="faculty">Officer</option>
+                <option value="teacher">Teacher</option>
+                <option value="officer">Officer</option>
                 <option value="staff">Staff</option>
             </select>
             {errors.designation && <p className="text-red-500 text-sm">{errors.designation.message}</p>}

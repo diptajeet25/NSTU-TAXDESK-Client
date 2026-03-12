@@ -5,7 +5,7 @@ import { Link } from 'react-router'
 const AboutNSTU = () => {
   return (
 
-    <div className="w-full bg-gradient-to-b from-gray-100 to-white flex flex-col gap-8 lg:flex-row justify-center items-center !pt-24 !pb-8 !px-4 lg:!px-8 ">
+    <div className="w-full bg-white flex flex-col gap-8 lg:flex-row justify-center items-center !pt-24 !pb-8 !px-4 lg:!px-8 ">
            <div className="flex-1">
                 <img src={campus} alt="NSTU TAXDESK" className=' w-full lg:h-82 rounded-2xl shadow-xl' />
             </div>
