@@ -9,6 +9,9 @@ import AuthProvider from './Context/AuthProvider.jsx';
 import { VerifyEmail } from './Page/VerifyEmail.jsx';
 import LoginForm from './components/LoginForm.jsx';
 import RegisterForm from './components/RegisterForm.jsx';
+import ForgetPassForm from './components/ForgetPassForm.jsx';
+import ForgetPass from './Page/ForgetPass.jsx';
+import DashboardLayout from './Layout/DashboardLayout.jsx';
 
 document.documentElement.setAttribute('data-theme', 'light');
 
@@ -28,6 +31,10 @@ const router = createBrowserRouter([
     {
       path:"login",
       element:<LoginForm></LoginForm>
+    },
+    {
+      path:"forget-password",
+      element:<ForgetPass></ForgetPass>
     }
    ]
 
@@ -35,6 +42,10 @@ const router = createBrowserRouter([
   {
     path:"/verify-email",
     element:<VerifyEmail></VerifyEmail>
+  },
+  {
+    path:"/dashboard",
+    element:<DashboardLayout></DashboardLayout>
   }
 ]);
 

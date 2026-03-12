@@ -65,7 +65,7 @@ const LoginForm = () => {
             {errors.password?.type === "maxLength" && <p className="text-red-500 text-sm">Password must be at most 12 characters</p>}
             {errors.password?.type === "pattern" && <p className="text-red-500 text-sm">Password must contain at least one uppercase letter, one special character, and one number</p>}
         </div>
-          <span className="text-sm text-primary">Forget Password </span>
+          <Link to="/auth/forget-password" className="text-sm text-primary">Forget Password </Link>
                 <button type="submit" className="bg-primary text-white rounded-lg w-[95%] !py-2 !mt-2">Login</button>
         <span className="text-sm text-gray-600 text-center"> Don't have an account? <Link to="/auth" className="text-primary font-bold">Register here</Link></span>
              <div className='w-[90%] !mx-auto'>

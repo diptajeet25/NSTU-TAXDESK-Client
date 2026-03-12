@@ -1,14 +1,11 @@
 import React from 'react'
-import AuthNavbar from '../components/AuthNavbar';
-import { AuthFooter } from '../components/AuthFooter';
-import VerifyUser from '../components/VerifyUser';
-import { CircleAlert } from 'lucide-react';
+import ForgetPassForm from '../components/ForgetPassForm'
+import { CircleAlert } from 'lucide-react'
 
-export const VerifyEmail = () => {
+const ForgetPass = () => {
   return (
     <div>
-        <AuthNavbar></AuthNavbar>
-        <VerifyUser></VerifyUser>
+        <ForgetPassForm></ForgetPassForm>
 <div className="w-[80%] lg:w-[60%] !mx-auto flex justify-center !mt-3">
   <div className="bg-white shadow-md text-sm flex items-start gap-2 text-black !px-4 !py-3 !mt-4 rounded-xl">
     <CircleAlert className="w-5 h-5 !mt-0.5" />
@@ -19,7 +16,9 @@ export const VerifyEmail = () => {
     </span>
   </div>
 </div>
-        <AuthFooter></AuthFooter>
+
     </div>
   )
 }
+
+export default ForgetPass

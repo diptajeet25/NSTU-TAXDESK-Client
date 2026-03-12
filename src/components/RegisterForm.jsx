@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { AuthContext } from '../Context/AuthContext';
 import { sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 
 const RegisterForm = () => {
@@ -148,7 +148,7 @@ const RegisterForm = () => {
 
         </div>
         <button type="submit" className="bg-primary text-white rounded-lg w-[95%] !py-2 !mt-2">Create Account</button>
-        <span className="text-sm text-gray-600 text-center">Already have an account? <a href="/login" className="text-primary font-bold">Login here</a></span>
+        <span className="text-sm text-gray-600 text-center">Already have an account? <Link to="/auth/login" className="text-primary font-bold">Login here</Link></span>
 
         </form>
         <div className='w-[90%] !mx-auto'>

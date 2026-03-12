@@ -27,11 +27,11 @@ const VerifyUser = () => {
   return () => clearInterval(interval);
 }, []);
   return (
-    <div className='flex flex-col justify-center items-center gap-3 bg-white shadow-md w-[80%] lg:w-[60%] !mx-auto !py-8 !px-4 rounded-xl !mt-20 lg:!mt-10 lg:!mb-4 '>
-        <div className="text-primary rounded-full w-[23%] lg:w-[10%] flex justify-center !mx-auto !p-4  bg-[#E9E7F7]">
+    <div className='flex flex-col justify-center items-center gap-3 bg-white shadow-md w-[90%] lg:w-[60%] !mx-auto !py-4 !px-4 rounded-xl !mt-14 lg:!mb-4 '>
+        <div className="text-primary rounded-full w-[22%] lg:w-[10%] flex justify-center !mx-auto !p-4  bg-[#E9E7F7]">
             <Mail size={40}/>
             </div>
-        <h1 className="text-2xl font-bold">Verify Your Email</h1>
+        <h1 className="text-2xl font-bold ">Verify Your Email</h1>
         <p className="text-gray-600 text-center">A verification email has been sent to your email address. Please check your inbox and click the verification link to activate your account.</p>
          <div className='w-full flex items-center justify-center !my-1'>
                 <p className="bg-[#E9E7F7]  text-center text-sm flex gap-1 text-primary !px-4 !mt-4 !py-3 rounded-xl"> <CircleAlert /> If you don't see the email, please check your spam folder or junk mail.</p>
