@@ -6,6 +6,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } f
 const AuthProvider = ({children}) => {
    const [user,setUser] = useState(null);
    const [userDetails,setUserDetails] = useState(null);
+   const [toogle,setToogle]=useState(false);
 const [loading,setLoading] = useState(true);
 
 
@@ -39,7 +40,7 @@ const logoutUser=()=>
     setLoading(true);
     return signOut(auth);
 }
-    const authInfo={user,setUser,loading,setLoading,createUser,loginUser,logoutUser,userDetails,setUserDetails};
+    const authInfo={user,setUser,loading,setLoading,createUser,loginUser,toogle,setToogle,logoutUser,userDetails,setUserDetails};
   return (
     <AuthContext value={authInfo}>
         {children}

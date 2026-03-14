@@ -12,6 +12,10 @@ import RegisterForm from './components/RegisterForm.jsx';
 import ForgetPassForm from './components/ForgetPassForm.jsx';
 import ForgetPass from './Page/ForgetPass.jsx';
 import DashboardLayout from './Layout/DashboardLayout.jsx';
+import TaxVatRate from './Page/TaxVatRate.jsx';
+import DashBoard from './Page/DashBoard.jsx';
+import TaxVATCalculator from './Page/TaxVATCalculator.jsx';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 document.documentElement.setAttribute('data-theme', 'light');
 
@@ -45,14 +49,32 @@ const router = createBrowserRouter([
   },
   {
     path:"/dashboard",
-    element:<DashboardLayout></DashboardLayout>
+    element:<DashboardLayout></DashboardLayout>,
+    children:[
+      {
+        index:true,
+        element:<DashBoard></DashBoard>
+      },
+      {
+        path:"tax-vatcalculator",
+        element:<TaxVATCalculator></TaxVATCalculator>
+      }
+      
+    ]
+  },
+  {
+    path:"/tax-vat-rates",
+    element:<TaxVatRate></TaxVatRate>
   }
 ]);
-
+const queryClient=new QueryClient()
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-   <AuthProvider>
-     <RouterProvider router={router} />
-   </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+       <RouterProvider router={router} />
+    </AuthProvider>
+    </QueryClientProvider>
+
   </StrictMode>,
 )

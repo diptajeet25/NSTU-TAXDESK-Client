@@ -1,17 +1,20 @@
 import React, { useContext, useEffect } from 'react'
 import logo from '../assets/nstu-logo.png'
 import { AuthContext } from '../Context/AuthContext'
+import { Menu } from 'lucide-react'
 
 const DashBoardNav = () => {
-    const {user}=useContext(AuthContext)
+    const {user,toogle,setToogle}=useContext(AuthContext);
     useEffect(()=>
     {
         console.log(user);
 
     },[user])
   return (
-      <div className="max-w-7xl mx-auto flex justify-between items-center !px-2 !py-1 !mb-0.5 sticky z-40 top-0 shadow-sm bg-white backdrop-blur-sm rounded-lg">
-  <div className="flex-1 flex items-center gap-1">
+      <div className="max-w-7xl mx-auto flex justify-between items-center !px-4 !py-1 !mb-0.5 sticky z-40 top-0 shadow-sm bg-white backdrop-blur-sm rounded-lg">
+  <div className="flex-1 flex items-center gap-1 ">
+    <Menu size={28} className="cursor-pointer" onClick={()=>setToogle(!toogle)} />
+ 
    
     <img src={logo} alt="NSTU Logo" className="w-12 lg:w-14  h-12 lg:w-14 " />
     <a className="font-bold text-primary text-lg lg:text-xl">NSTU TAXDESK</a>
