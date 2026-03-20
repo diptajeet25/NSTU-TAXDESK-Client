@@ -206,9 +206,9 @@ const isFiltering = search || category;
 
         <td className="!px-4 !py-5 text-center">
           <div className="flex justify-center gap-2">
-            <button className="btn btn-primary text-sm !px-3 !py-2">
+            <Link to={`/payment/${item.id}`} className="btn btn-primary text-sm !px-3 !py-2">
               Payment
-            </button>
+            </Link>
             <button className="btn btn-outline bg-white hover:bg-red-500 hover:text-white border border-red-400 text-sm !px-3 !py-2">
               Delete
             </button>

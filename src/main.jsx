@@ -17,6 +17,7 @@ import DashBoard from './Page/DashBoard.jsx';
 import TaxVATCalculator from './Page/TaxVATCalculator.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PendingPayments from './Page/PendingPayments.jsx';
+import PaymentPage from './Page/PaymentPage.jsx';
 
 document.documentElement.setAttribute('data-theme', 'light');
 
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
   {
     path:"/tax-vat-rates",
     element:<TaxVatRate></TaxVatRate>
+  },
+  {
+    path:`/payment/:paymentId`,
+    element:<PaymentPage></PaymentPage>
   }
 ]);
 const queryClient=new QueryClient()
