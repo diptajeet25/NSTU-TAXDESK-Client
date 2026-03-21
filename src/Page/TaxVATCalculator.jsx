@@ -4,11 +4,12 @@ import React, { useContext, useEffect, useState } from 'react'
 import useAxiosSecure from '../hooks/useAxiosSecure'
 import { useForm, useWatch } from 'react-hook-form'
 import { AuthContext } from '../Context/AuthContext'
+import { useNavigate } from 'react-router'
 
 const TaxVATCalculator = () => {
   const axiosSecure=useAxiosSecure();
   const {user}=useContext(AuthContext);
-  console.log(user);
+  const navigate=useNavigate()
   const [calculatedResult,setCalculatedResult]=useState(null);
   const {register, handleSubmit,setValue,reset,control, formState: { errors }} = useForm({defaultValues: {
     category: "",
@@ -73,9 +74,10 @@ const TaxVATCalculator = () => {
       })
  setCalculatedResult(null);
     }
+
+
   const pendingPayments=async()=>
   {
-    console.log(calculatedResult);
     const pendingData={
       id:`TXN${new Date().getFullYear()}${new Date().getMonth() + 1}${new Date().getDate()}${Math.floor(Math.random() * 10000)}`,
       name: calculatedResult.name,
@@ -89,21 +91,41 @@ const TaxVATCalculator = () => {
       status: "Pending",
       userEmail:user?.email,
       createdAt: new Date()
-
-
     }
   
  
    const res=await axiosSecure.post('/payments',pendingData)
     if(res.data.insertedId)
     {
-      alert("Payment saved as pending successfully!");
+     
   resetFun();
      
     }
     else{
       alert("Failed to save pending payment. Please try again.");
     }
+  }
+  const PaymentRedirect=async()=>
+  {
+   const pendingData={
+      id:`TXN${new Date().getFullYear()}${new Date().getMonth() + 1}${new Date().getDate()}${Math.floor(Math.random() * 10000)}`,
+      name: calculatedResult.name,
+      category: calculatedResult.category,
+      baseAmount: calculatedResult.baseAmount,
+      vatRate: calculatedResult.vatRate,
+      taxRate: calculatedResult.taxRate,
+      taxAmount: calculatedResult.taxAmount,
+      vatAmount: calculatedResult.vatAmount,
+      totalAmount: calculatedResult.totalAmount,
+      status: "Pending",
+      userEmail:user?.email,
+      createdAt: new Date()
+    }
+    const res=await axiosSecure.post('/payments',pendingData)
+    console.log(res);
+    navigate(`/payment/${pendingData.id}`);
+
+  
   }
 
   return (
@@ -231,7 +253,7 @@ const TaxVATCalculator = () => {
   </div>
   <div className="flex flex-col gap-4 !mt-6">
 
- <button className='w-full btn btn-primary !py-4 text-md text-bold'> <CreditCard  size={20} /> Proceed to Payment</button>
+ <button onClick={PaymentRedirect} className='w-full btn btn-primary !py-4 text-md text-bold'> <CreditCard  size={20} /> Proceed to Payment</button>
 <div className="grid grid-cols-1 lg:grid-cols-2 !mt-0 lg:!mt-2 gap-4 lg:gap-6">
   <button onClick={pendingPayments} className='btn w-full btn-primary btn-outline !py-4 text-md text-bold'><Save size={20} />Save as Pending</button>
   <button onClick={resetFun} className='btn w-full  btn-outline !py-4 text-md text-bold'><X  size={20} />Cancle</button>

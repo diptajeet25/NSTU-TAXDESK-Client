@@ -18,7 +18,7 @@ function Navbar() {
     <ul className="flex items-center gap-4 px-1">
       <Link to="/" className=" cursor-pointer">Home</Link>
       <Link to="/about" className=" cursor-pointer">About</Link>
-       <Link to="/dashboard" className=" cursor-pointer">DashBoard</Link>
+       <Link to="/dashboard/dashboard" className=" cursor-pointer">DashBoard</Link>
     </ul>
   </div>
   <div className="flex flex-1 gap-2 justify-end pr-4">

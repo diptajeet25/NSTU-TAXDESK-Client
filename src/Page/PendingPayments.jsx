@@ -26,7 +26,7 @@ const { data: pendingStats } = useQuery({
     enabled: !loading && !!user?.email,
     queryFn: async () => {
         const res = await axiosSecure.get(`/pending-payments/stats?email=${user?.email}`);
-        console.log(res.data);
+        console.log(res.data.lastpending[0].createdAt);
         return res.data;
     }
 });
@@ -36,7 +36,7 @@ const { data: pendingStats } = useQuery({
     const [category,setCategory]=useState('');
     const [sort,setSort]=useState('newest');
     const { register,  formState: { errors } } = useForm();
-    const {data:pendingPayments, isLoading,isFetching, isError} = useQuery({
+    const {data:pendingPayments, isLoading,isFetching} = useQuery({
         queryKey:["pendingPayments",search,category,sort],
         enabled: !loading && !!user?.email,
         keepPreviousData: true,
@@ -67,7 +67,7 @@ const isFiltering = search || category;
                     <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
                             <h2 className='text-gray-600'>Total Pending Amount</h2>
-                            <p className="text-2xl font-bold text-gray-800">{totalAmountSum}</p>
+                            <p className="text-2xl font-bold text-gray-800">{ totalAmountSum ? totalAmountSum : 0}</p>
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
@@ -79,7 +79,7 @@ const isFiltering = search || category;
                     </div>
                        <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
-                            <h2 className='text-gray-600'>Total Pending Payments</h2>
+                            <h2 className='text-gray-600'>Number of Pending Payments</h2>
                             <p className="text-2xl font-bold text-gray-800">{totalPending ? totalPending: "0"}</p>
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
@@ -93,7 +93,7 @@ const isFiltering = search || category;
                       <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
                             <h2 className='text-gray-600'>Last Pending Payments</h2>
-                            <p className="text-2xl font-bold text-gray-800">5</p>
+                           <p className="text-2xl font-bold text-gray-800">{totalPending ? new Date(pendingStats.lastpending[0].createdAt).toLocaleDateString('en-GB') : "N/A"}</p>
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
@@ -163,7 +163,7 @@ const isFiltering = search || category;
 </div>
                                         
                   </div>
-                  <div className={`overflow-x-auto  min-w-full   !my-10 !mb-4 rounded-xl shadow-sm border border-gray-200 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
+                  <div className={`!overflow-x-auto  min-w-full   !my-10 !mb-4 rounded-xl shadow-sm border border-gray-200 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
         <table className="w-full text-sm text-left">
           <thead>
             <tr className="bg-primary text-white">

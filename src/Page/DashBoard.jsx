@@ -1,34 +1,48 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Calculator, Clock4, CreditCard, DollarSign, Download, Receipt, TrendingUp } from 'lucide-react'
+import { AuthContext } from '../Context/AuthContext'
+import { useQuery } from '@tanstack/react-query';
+import useAxiosSecure from '../hooks/useAxiosSecure';
 
 
 const DashBoard = () => {
+  const {user}=useContext(AuthContext);
+  const axiosSecure=useAxiosSecure();
+  const {data:dashBoardStats}=useQuery({
+    queryKey:["dashBoardStats",user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const res=await axiosSecure.get(`/dashboard-stats?email=${user?.email}`);
+      console.log(res.data);
+      return res.data ;
+    }
+  })
       const summaryCards = [
     {
       title: 'Total Tax Calculated',
-      amount: 'Tk 18,450',
-      change: '+12% from last month',
+      amount: `Tk ${dashBoardStats?.totalPaidAmount+dashBoardStats?.totalPendingAmount || 0}`,
+      change: dashBoardStats ? `${dashBoardStats.totalPaidCount + dashBoardStats.totalPendingCount} invoices processed` : 'No invoices processed',
       icon: Calculator,
       positive: true,
     },
     {
       title: 'Total Payments Made',
-      amount: 'Tk 15,250',
-      change: '+8% from last month',
+      amount: `Tk ${dashBoardStats?.totalPaidAmount || 0}`,
+      change: dashBoardStats?.totalPaidAmount > 0 ? `${dashBoardStats.totalPaidCount} Paid invoices` : 'No payments made',
       icon: CreditCard,
-      positive: true,
+      positive: false,
     },
     {
       title: 'Pending Payments',
-      amount: 'Tk 3,200',
-      change: '2 pending invoices',
+      amount: `Tk ${dashBoardStats?.totalPendingAmount || 0}`,
+      change: dashBoardStats?.totalPendingAmount > 0 ? `${dashBoardStats.totalPendingCount} pending invoices` : 'No pending payments',
       icon: Clock4,
       positive: false,
     },
     {
       title: 'Last Transaction',
-      amount: 'Tk 1,000',
-      change: 'Paid on Mar 10, 2026',
+      amount: `Tk ${dashBoardStats?.lastPayment.totalAmount || 0}`,
+      change: `Paid on ${dashBoardStats?.lastPayment.paidAt ? new Date(dashBoardStats.lastPayment.paidAt).toLocaleDateString('en-GB') : 'N/A'}`,
       icon: DollarSign,
       positive: false,
     },
@@ -47,7 +61,7 @@ const DashBoard = () => {
     <section className="flex-1 h-full bg-gray-50 !px-4 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200">
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 text:md lg:text-xl !mt-2 max-w-3xl">
-              Welcome back! Here is your tax and payment overview.
+              Welcome back {user?.displayName} ! Here is your tax and payment overview.
             </p>
 
             <div className="!mt-7 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -60,7 +74,7 @@ const DashBoard = () => {
                       <div>
                         <p className="text-gray-500 text-base">{card.title}</p>
                         <h3 className="text-2xl font-bold text-gray-900 !mt-2">{card.amount}</h3>
-                        <p className={`!mt-2 text-sm font-semibold ${card.positive ? 'text-emerald-600' : 'text-gray-500'}`}>
+                        <p className={`!mt-2 text-sm font-semibold text-gray-500`}>
                           {card.change}
                         </p>
                       </div>

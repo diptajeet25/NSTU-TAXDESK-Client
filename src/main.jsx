@@ -18,6 +18,7 @@ import TaxVATCalculator from './Page/TaxVATCalculator.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PendingPayments from './Page/PendingPayments.jsx';
 import PaymentPage from './Page/PaymentPage.jsx';
+import PaymentHistory from './Page/PaymentHistory.jsx';
 
 document.documentElement.setAttribute('data-theme', 'light');
 
@@ -54,7 +55,7 @@ const router = createBrowserRouter([
     element:<DashboardLayout></DashboardLayout>,
     children:[
       {
-        index:true,
+        path:'dashboard',
         element:<DashBoard></DashBoard>
       },
       {
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
       {
         path:"pending-payments",
         element:<PendingPayments></PendingPayments>
+      },
+      {
+        path:"payment-history",
+        element:<PaymentHistory></PaymentHistory>
       }
       
     ]
