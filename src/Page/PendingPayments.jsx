@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react'
 import useAxiosSecure from '../hooks/useAxiosSecure'
 import { AuthContext } from '../Context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { Calculator, CircleAlert, CircleCheckBig, CreditCard, FileText, Search, Trash, Trash2 } from 'lucide-react';
+import { Calculator, CircleAlert, CircleCheckBig, Clock, CreditCard, FileText, Receipt, Search, Trash, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
 import Loading from '../components/Loading';
@@ -63,7 +63,7 @@ const isFiltering = search || category;
               View and complete your pending tax and VAT payments.
             </p>
               <div className="!mt-4 rounded-xl !px-5 !mx-auto !py-5"> 
-                <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 h-full gap-5 lg:!mx-18">
+                <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 h-full gap-5 lg:!mx-12">
                     <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
                             <h2 className='text-gray-600'>Total Pending Amount</h2>
@@ -71,7 +71,7 @@ const isFiltering = search || category;
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
-                <CircleCheckBig size={20} />
+                <Receipt size={20} />
             </div> </span>
 
 
@@ -79,12 +79,12 @@ const isFiltering = search || category;
                     </div>
                        <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
-                            <h2 className='text-gray-600'>Number of Pending Payments</h2>
+                            <h2 className='text-gray-600'>No. of Pending Payments</h2>
                             <p className="text-2xl font-bold text-gray-800">{totalPending ? totalPending: "0"}</p>
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
-                <CircleCheckBig size={20} />
+                <FileText size={20} />
             </div> </span>
 
 
@@ -97,7 +97,7 @@ const isFiltering = search || category;
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
-                <CircleCheckBig size={20} />
+                <Clock size={20} />
             </div> </span>
 
 
@@ -167,7 +167,7 @@ const isFiltering = search || category;
         <table className="w-full text-sm text-left">
           <thead>
             <tr className="bg-primary text-white">
-              <th className="!px-4 !py-4 font-semibold text-md w-20">Serial</th>
+             
               <th className="!px-4 !py-4 font-semibold text-md">Payment ID</th>
               <th className="!px-4 !py-4 font-semibold text-md">Date</th>
               <th className="!px-4 !py-4 font-semibold text-md">Product/Service Name</th>
@@ -191,7 +191,7 @@ const isFiltering = search || category;
 
     pendingPayments.map((item, i) => (
       <tr key={item.id} className="hover:bg-indigo-50/40 transition-colors">
-        <td className="!px-4 !py-5 text-center">{i + 1}</td>
+       
         <td className="!px-4 !py-5 text-center">{item.id}</td>
         <td className="!px-4 !py-5 text-center whitespace-nowrap">
           {formatDate(item.createdAt)}

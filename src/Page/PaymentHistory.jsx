@@ -129,7 +129,7 @@ const isFiltering = search || category;
         <table className="w-full text-sm text-left">
           <thead>
             <tr className="bg-primary text-white">
-              <th className="!px-4 !py-4 font-semibold text-md w-20">Serial</th>
+              
               <th className="!px-4 !py-4 font-semibold text-md">Payment ID</th>
               <th className="!px-4 !py-4 font-semibold text-md">Date</th>
               <th className="!px-4 !py-4 font-semibold text-md">Product/Service Name</th>
@@ -154,7 +154,7 @@ const isFiltering = search || category;
 
     transactions.map((item, i) => (
       <tr key={item.id} className="hover:bg-indigo-50/40 transition-colors">
-        <td className="!px-4 !py-5 text-center">{i + 1}</td>
+       
         <td className="!px-4 !py-5 text-center">{item.id}</td>
         <td className="!px-4 !py-5 text-center whitespace-nowrap">
           {formatDate(item.createdAt)}

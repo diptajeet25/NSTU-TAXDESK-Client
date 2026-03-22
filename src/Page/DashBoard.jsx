@@ -1,8 +1,9 @@
 import React, { useContext } from 'react'
-import { Calculator, Clock4, CreditCard, DollarSign, Download, Receipt, TrendingUp } from 'lucide-react'
+import { Calculator, Clock4, CreditCard, DollarSign, Download, Receipt, TrendingUp, User } from 'lucide-react'
 import { AuthContext } from '../Context/AuthContext'
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../hooks/useAxiosSecure';
+import { Link } from 'react-router';
 
 
 const DashBoard = () => {
@@ -49,12 +50,11 @@ const DashBoard = () => {
   ]
 
   const quickActions = [
-    { label: 'Calculate Tax', icon: Calculator },
-    { label: 'Make Payment', icon: CreditCard },
-    { label: 'View Pending', icon: Clock4 },
-    { label: 'Download Receipt', icon: Download },
-    { label: 'Tax History', icon: Receipt },
-    { label: 'Reports', icon: TrendingUp },
+    { label: 'Calculate Tax', icon: Calculator,link:"/dashboard/tax-vatCalculator" },
+    { label: 'View Pending', icon: Clock4, link:"/dashboard/pending-payments" },
+    { label: 'Tax History', icon: Receipt,link:"/dashboard/payment-history" },
+    { label: 'Tax-VAT Rates', icon: TrendingUp,link:'/tax-vat-rates' },
+    {label:'Profile',icon: User,link:'/dashboard/profile'}
   ]
 
   return (
@@ -88,23 +88,26 @@ const DashBoard = () => {
               })}
             </div>
 
-            <h2 className="text-4xl font-bold text-gray-900 !mt-9">Quick Actions</h2>
-            <div className="!mt-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+            <h2 className="text-2xl font-bold text-gray-900 !mt-9">Quick Actions</h2>
+            <div className="!mt-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
               {quickActions.map((action) => {
                 const ActionIcon = action.icon
 
                 return (
-                  <button
+                  <Link to={action.link}
                     type="button"
                     key={action.label}
                     className="rounded-2xl border border-gray-200 bg-white !py-6 !px-3 flex flex-col items-center justify-center gap-3 text-gray-700 transition-all duration-200 hover:border-primary/40 hover:shadow-sm hover:text-primary"
                   >
                     <ActionIcon size={30} strokeWidth={2.1} />
                     <span className="text-sm font-semibold text-center">{action.label}</span>
-                  </button>
+                  </Link>
                 )
               })}
             </div>
+
+
+            <h2 className="text-2xl font-bold text-gray-900 !mt-9">Recent Transactions</h2>
           </section>
   )
 }

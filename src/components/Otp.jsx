@@ -8,6 +8,7 @@ const Otp = ({phone,setStep}) => {
     const handleotp=(data)=>
     {
        setStep(4);
+       
     }
   return (
  <div className="w-full flex flex-col justify-center gap-4 w-full lg:w-[70%] !mx-auto !mt-10 bg-white rounded-lg shadow-md !mb-10 !p-6">
