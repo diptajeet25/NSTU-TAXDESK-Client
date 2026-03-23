@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { CircleCheckBig, Search } from 'lucide-react'
+import { CircleCheckBig, Clock, FileText, Receipt, Search } from 'lucide-react'
 import React, { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import useAxiosSecure from '../hooks/useAxiosSecure';
@@ -18,6 +18,18 @@ const PaymentHistory = () => {
         enabled: !!user?.email,
         queryFn: async () => {
             const res=await axiosSecure.get(`/payment-history?email=${user?.email}&search=${search}&category=${category}&sort=${sort}`);
+            console.log(res.data);
+            return res.data;
+        }
+
+    })
+
+    const {data:paymentStats}=useQuery({
+        queryKey:["paymentStats",user?.email],
+        enabled: !!user?.email,
+        queryFn: async () => {
+            const res=await axiosSecure.get(`/payment-stats?email=${user?.email}`);
+            
             console.log(res.data);
             return res.data;
         }
@@ -46,11 +58,11 @@ const isFiltering = search || category;
                     <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
                             <h2 className='text-gray-600'>Total Paid Amount</h2>
-                            <p className="text-2xl font-bold text-gray-800">0</p>
+                            <p className="text-2xl font-bold text-gray-800">{paymentStats?.totalPaidAmountSum?.toLocaleString('en-BD', { style: 'currency', currency: 'BDT' }) || 'Tk 0'}</p>
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
-                <CircleCheckBig size={20} />
+                <Receipt size={20} />
             </div> </span>
 
 
@@ -58,12 +70,12 @@ const isFiltering = search || category;
                     </div>
                        <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
-                            <h2 className='text-gray-600'>Number of Pending Payments</h2>
-                            <p className="text-2xl font-bold text-gray-800">0</p>
+                            <h2 className='text-gray-600'>No. of Total Payment</h2>
+                            <p className="text-2xl font-bold text-gray-800">{paymentStats?.totalPaid ? paymentStats.totalPaid : '0'}</p>
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
-                <CircleCheckBig size={20} />
+                <FileText size={20} />
             </div> </span>
 
 
@@ -71,12 +83,12 @@ const isFiltering = search || category;
                     </div>
                       <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
-                            <h2 className='text-gray-600'>Last Pending Payments</h2>
-                           <p className="text-2xl font-bold text-gray-800">N/A</p>
+                            <h2 className='text-gray-600'>Last Payment Date</h2>
+                           <p className="text-2xl font-bold text-gray-800">{ paymentStats?.lastPaid ? new Date(paymentStats.lastPaid[0].paidAt).toLocaleDateString('en-GB') : "N/A"}</p>
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
-                <CircleCheckBig size={20} />
+                <Clock size={20} />
             </div> </span>
 
 
@@ -125,13 +137,13 @@ const isFiltering = search || category;
                       </div>
               
                             </div>
-                                            <div className={`!overflow-x-auto  min-w-full   !my-10 !mb-4 rounded-xl shadow-sm border border-gray-200 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
-        <table className="w-full text-sm text-left">
+        <div className={`  min-w-full   !my-10 !mb-4 rounded-xl shadow-sm border border-gray-200 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
+        <table className="w-full text-sm text-left !overflow-x-auto">
           <thead>
             <tr className="bg-primary text-white">
               
               <th className="!px-4 !py-4 font-semibold text-md">Payment ID</th>
-              <th className="!px-4 !py-4 font-semibold text-md">Date</th>
+              <th className="!px-4 !py-4 font-semibold text-md">Payment Date</th>
               <th className="!px-4 !py-4 font-semibold text-md">Product/Service Name</th>
               <th className="!px-4 !py-4 font-semibold text-md text-center">Type</th>
               <th className="!px-4 !py-4 font-semibold text-md text-center">Base Amount</th>
@@ -157,7 +169,7 @@ const isFiltering = search || category;
        
         <td className="!px-4 !py-5 text-center">{item.id}</td>
         <td className="!px-4 !py-5 text-center whitespace-nowrap">
-          {formatDate(item.createdAt)}
+          {formatDate(item.paidAt)}
         </td>
         <td className="!px-4 !py-5 text-center">{item.name}</td>
 

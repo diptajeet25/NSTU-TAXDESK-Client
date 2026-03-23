@@ -4,12 +4,13 @@ import { AuthContext } from '../Context/AuthContext'
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { Link } from 'react-router';
+import RecentTransaction from '../components/RecentTransaction';
 
 
 const DashBoard = () => {
   const {user}=useContext(AuthContext);
   const axiosSecure=useAxiosSecure();
-  const {data:dashBoardStats}=useQuery({
+  const {data:dashBoardStats,isLoading,isFetching}=useQuery({
     queryKey:["dashBoardStats",user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
@@ -18,6 +19,9 @@ const DashBoard = () => {
       return res.data ;
     }
   })
+
+
+
       const summaryCards = [
     {
       title: 'Total Tax Calculated',
@@ -56,6 +60,7 @@ const DashBoard = () => {
     { label: 'Tax-VAT Rates', icon: TrendingUp,link:'/tax-vat-rates' },
     {label:'Profile',icon: User,link:'/dashboard/profile'}
   ]
+  
 
   return (
     <section className="flex-1 h-full bg-gray-50 !px-4 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200">
@@ -105,9 +110,10 @@ const DashBoard = () => {
                 )
               })}
             </div>
+            <RecentTransaction></RecentTransaction>
 
 
-            <h2 className="text-2xl font-bold text-gray-900 !mt-9">Recent Transactions</h2>
+        
           </section>
   )
 }

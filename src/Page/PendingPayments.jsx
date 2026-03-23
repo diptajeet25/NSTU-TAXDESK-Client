@@ -32,10 +32,11 @@ const { data: pendingStats } = useQuery({
 });
 
 
+
     const [search,setSearch]=useState('');
     const [category,setCategory]=useState('');
     const [sort,setSort]=useState('newest');
-    const { register,  formState: { errors } } = useForm();
+    const { register,   } = useForm();
     const {data:pendingPayments, isLoading,isFetching} = useQuery({
         queryKey:["pendingPayments",search,category,sort],
         enabled: !loading && !!user?.email,
@@ -67,7 +68,7 @@ const isFiltering = search || category;
                     <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
                         <div className='flex flex-col  gap-2'>
                             <h2 className='text-gray-600'>Total Pending Amount</h2>
-                            <p className="text-2xl font-bold text-gray-800">{ totalAmountSum ? totalAmountSum : 0}</p>
+                            <p className="text-2xl font-bold text-gray-800">{ totalAmountSum ? totalAmountSum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT' }) : 0}</p>
                         </div>
                          <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
                 
