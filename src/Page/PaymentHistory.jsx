@@ -5,11 +5,12 @@ import { useForm } from 'react-hook-form';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { AuthContext } from '../Context/AuthContext';
 import { Link } from 'react-router';
+import Loading from '../components/Loading';
 
 const PaymentHistory = () => {
-    const {register,formState:{errors}}=useForm();
+    const {register}=useForm();
     const axiosSecure=useAxiosSecure();
-    const {user}=useContext(AuthContext);
+    const {user,loading}=useContext(AuthContext);
     const [search,setSearch]=useState("");
     const [category,setCategory]=useState("");
     const [sort,setSort]=useState("newest");
@@ -46,6 +47,9 @@ const PaymentHistory = () => {
 };
       const hasPayments = transactions?.length > 0;
 const isFiltering = search || category;
+if(loading || isLoading)
+    return (
+  <Loading></Loading>)
 
   return (
     <section className="flex-1 h-full bg-gray-50 !px-4 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200">

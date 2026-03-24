@@ -5,10 +5,11 @@ import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { Link } from 'react-router';
 import RecentTransaction from '../components/RecentTransaction';
+import Loading from '../components/Loading';
 
 
 const DashBoard = () => {
-  const {user}=useContext(AuthContext);
+  const {user,loading}=useContext(AuthContext);
   const axiosSecure=useAxiosSecure();
   const {data:dashBoardStats,isLoading,isFetching}=useQuery({
     queryKey:["dashBoardStats",user?.email],
@@ -60,7 +61,9 @@ const DashBoard = () => {
     { label: 'Tax-VAT Rates', icon: TrendingUp,link:'/tax-vat-rates' },
     {label:'Profile',icon: User,link:'/dashboard/profile'}
   ]
-  
+  if(loading || isLoading)
+    return (
+  <Loading></Loading>)
 
   return (
     <section className="flex-1 h-full bg-gray-50 !px-4 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200">

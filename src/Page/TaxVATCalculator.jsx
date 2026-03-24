@@ -5,10 +5,11 @@ import useAxiosSecure from '../hooks/useAxiosSecure'
 import { useForm, useWatch } from 'react-hook-form'
 import { AuthContext } from '../Context/AuthContext'
 import { useNavigate } from 'react-router'
+import Loading from '../components/Loading'
 
 const TaxVATCalculator = () => {
   const axiosSecure=useAxiosSecure();
-  const {user}=useContext(AuthContext);
+  const {user,loading}=useContext(AuthContext);
   const navigate=useNavigate()
   const [calculatedResult,setCalculatedResult]=useState(null);
   const {register, handleSubmit,setValue,reset,control, formState: { errors }} = useForm({defaultValues: {
@@ -18,7 +19,7 @@ const TaxVATCalculator = () => {
     vatRate: "",
     taxRate: ""
   }});
-  const {data:taxes=[],refetch}=useQuery(
+  const {data:taxes=[],isLoading}=useQuery(
     {
       queryKey:['taxes'],
       queryFn:async()=>
@@ -61,8 +62,7 @@ const TaxVATCalculator = () => {
     }
     setCalculatedResult(calculatedResult);
     console.log(calculatedResult);
-    alert(`VAT Amount: ${vatAmount.toFixed(2)}\nTAX Amount: ${taxAmount.toFixed(2)}\nTotal Amount: ${totalAmount.toFixed(2)}`);
-  }
+      }
     const resetFun=()=>{
         reset({
         category:"",
@@ -126,6 +126,10 @@ const TaxVATCalculator = () => {
     navigate(`/payment/${pendingData.id}`);
 
   
+  }
+  if(loading || isLoading)
+  {
+    return <Loading></Loading>
   }
 
   return (
