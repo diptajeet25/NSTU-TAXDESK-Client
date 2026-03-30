@@ -5,13 +5,14 @@ import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { Link } from 'react-router';
 import RecentTransaction from '../components/RecentTransaction';
-import Loading from '../components/Loading';
 
 
 const DashBoard = () => {
   const {user,loading}=useContext(AuthContext);
   const axiosSecure=useAxiosSecure();
-  const {data:dashBoardStats,isLoading,isFetching}=useQuery({
+  const role=useRole();
+  console.log(role);
+  const {data:dashBoardStats,isLoading}=useQuery({
     queryKey:["dashBoardStats",user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
@@ -47,8 +48,8 @@ const DashBoard = () => {
     },
     {
       title: 'Last Transaction',
-      amount: `Tk ${dashBoardStats?.lastPayment.totalAmount || 0}`,
-      change: `Paid on ${dashBoardStats?.lastPayment.paidAt ? new Date(dashBoardStats.lastPayment.paidAt).toLocaleDateString('en-GB') : 'N/A'}`,
+      amount: `Tk ${dashBoardStats?.lastPayment?.totalAmount || 0}`,
+      change: `Paid on ${dashBoardStats?.lastPayment?.paidAt ? new Date(dashBoardStats.lastPayment.paidAt).toLocaleDateString('en-GB') : 'N/A'}`,
       icon: DollarSign,
       positive: false,
     },

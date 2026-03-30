@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react'
 
 const DashBoardNav = () => {
     const {user,toogle,setToogle}=useContext(AuthContext);
+    
     useEffect(()=>
     {
         console.log(user);

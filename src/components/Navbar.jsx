@@ -2,9 +2,11 @@ import React, { useContext } from 'react'
 import logo from '../assets/nstu-logo.png'
 import { Link } from 'react-router'
 import { AuthContext } from '../Context/AuthContext'
+import useRole from '../hooks/useRole';
 
 function Navbar() {
   const {userDetails}=useContext(AuthContext);
+  const {role}=useRole();
   console.log(userDetails);
   return (
 
@@ -18,7 +20,10 @@ function Navbar() {
     <ul className="flex items-center gap-4 px-1">
       <Link to="/" className=" cursor-pointer">Home</Link>
       <Link to="/about" className=" cursor-pointer">About</Link>
-       <Link to="/dashboard/dashboard" className=" cursor-pointer">DashBoard</Link>
+      { role==="admin" ?
+       <Link to="/dashboard/admin" className=" cursor-pointer">DashBoard</Link> :
+       <Link to="/dashboard/user" className=" cursor-pointer">DashBoard</Link>
+      }
     </ul>
   </div>
   <div className="flex flex-1 gap-2 justify-end pr-4">
