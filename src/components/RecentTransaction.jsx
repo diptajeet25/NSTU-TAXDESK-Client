@@ -28,10 +28,10 @@ const RecentTransaction = () => {
 };
 
   return (
-    <div>
-            <h2 className="text-2xl font-bold text-gray-900 !mt-9">Recent Transactions</h2>
-                <div className={`  min-w-full   !my-6 !mb-4 rounded-xl shadow-sm border border-gray-200 ${!recentTransactions  ? "hidden" : ""}`}>
-        <table className="w-full text-sm text-left !overflow-x-auto">
+    <div className="min-w-0">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 !mt-9">Recent Transactions</h2>
+          <div className={`!my-6 !mb-4 overflow-x-auto rounded-xl shadow-sm border border-gray-200 ${!recentTransactions  ? "hidden" : ""}`}>
+      <table className="min-w-[900px] w-full text-sm text-left">
           <thead>
             <tr className="bg-primary text-white">
               

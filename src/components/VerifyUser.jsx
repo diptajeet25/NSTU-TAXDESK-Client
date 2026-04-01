@@ -9,7 +9,7 @@ const VerifyUser = () => {
     const resendVerificationEmail= async()=>
     {
         await sendEmailVerification(auth.currentUser,{
-                        url:`${window.location.origin}/dashboard`,
+                        url:`${window.location.origin}/dashboard/user`,
                         handleCodeInApp:false
                     }
                     );
@@ -20,7 +20,7 @@ const VerifyUser = () => {
     await auth.currentUser.reload();
 
     if (auth.currentUser.emailVerified) { 
-      navigate("/dashboard");
+      navigate("/dashboard/user");
     }
   }, 1000);
 

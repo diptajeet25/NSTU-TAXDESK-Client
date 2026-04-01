@@ -1,84 +1,64 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import logo from '../assets/nstu-logo.png'
 import { Link } from 'react-router'
-import { AuthContext } from '../Context/AuthContext'
+import useRole from '../hooks/useRole';
+import { Menu } from 'lucide-react';
 
 function Navbar() {
-  const {userDetails}=useContext(AuthContext);
-  console.log(userDetails);
+  const {role}=useRole();
+  const dashboardPath = role === "admin" ? "/dashboard/admin" : "/dashboard/user";
+
   return (
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+      <div className="w-full max-w-7xl mx-auto !px-3 sm:!px-4">
+        <div className="h-16 lg:h-[74px] flex items-center justify-between gap-3">
+          <Link to="/" className="inline-flex items-center gap-1">
+            <img src={logo} alt="NSTU Logo" className="block h-10 w-10 sm:h-11 sm:w-11 lg:h-14 lg:w-14 shrink-0 object-contain" />
+            <span className="font-bold leading-none text-primary text-sm sm:text-lg lg:text-xl whitespace-nowrap">
+              NSTU TAXDESK
+            </span>
+          </Link>
 
-        <div className="max-w-7xl mx-auto flex justify-between items-center !px-2 !py-1 !mb-0.5 sticky z-40 top-0 shadow-sm bg-white backdrop-blur-sm rounded-lg">
-  <div className="flex-1 flex items-center gap-1">
-   
-    <img src={logo} alt="NSTU Logo" className="w-12 lg:w-14  h-12 lg:w-14 " />
-    <a className="font-bold text-primary text-lg lg:text-xl">NSTU TAXDESK</a>
-  </div>
-  <div className=" hidden lg:flex flex-1 justify-center">
-    <ul className="flex items-center gap-4 px-1">
-      <Link to="/" className=" cursor-pointer">Home</Link>
-      <Link to="/about" className=" cursor-pointer">About</Link>
-       <Link to="/dashboard/dashboard" className=" cursor-pointer">DashBoard</Link>
-    </ul>
-  </div>
-  <div className="flex flex-1 gap-2 justify-end pr-4">
-    <div  className="hidden lg:flex gap-3" >
-         <Link to="/auth" className="btn btn-outline btn-primary !px-5 !py-0">Sign Up</Link>
-<Link to="/signin" className="btn btn-primary !px-5 !py-0">Sign In</Link>
-    </div>
-  
-<div className="dropdown dropdown-end">
-  <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-6 w-6"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-        d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  </div>
+          <nav className="hidden lg:flex flex-1 justify-center">
+            <ul className="flex items-center gap-6 text-[0.98rem] font-medium text-gray-700">
+              <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
+              <li><Link to="/tax-vat-rates" className="hover:text-primary transition-colors">Tax & VAT Rates</Link></li>
+              <li><Link to={dashboardPath} className="hover:text-primary transition-colors">Dashboard</Link></li>
+            </ul>
+          </nav>
 
-  <div
-    tabIndex={0}
-    className="dropdown-content right-0 mt-3 w-78 bg-white rounded-xl shadow-lg border !p-4"
-  >
+          <div className="hidden lg:flex items-center gap-2.5">
+            <Link to="/auth" className="btn btn-outline btn-primary !px-5 !py-0">Sign Up</Link>
+            <Link to="/auth/login" className="btn btn-primary !px-5 !py-0">Sign In</Link>
+          </div>
 
-    <ul className="flex flex-col gap-4 text-lg font-medium">
-      <li>
-        <Link to="/" className="hover:text-primary">Home</Link>
-      </li>
+          <div className="dropdown dropdown-end lg:hidden">
+            <button tabIndex={0} type="button" className="btn btn-ghost btn-sm" aria-label="Open menu">
+              <Menu className="h-5 w-5" />
+            </button>
 
-      <li><Link to="/about" className="hover:text-primary">About</Link></li>
-       <Link to="/dashboard" className=" cursor-pointer">DashBoard</Link>
-       <li><Link to="/about" className="hover:text-primary">Terms and Conditions</Link></li>
-    </ul>
+            <div tabIndex={0} className="dropdown-content right-0 !mt-3 w-72 bg-white rounded-xl shadow-lg border border-gray-200 !p-4">
+              <ul className="flex flex-col gap-3 text-base font-medium text-gray-700">
+                <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
+                <li><Link to="/tax-vat-rates" className="hover:text-primary transition-colors">Tax & VAT Rates</Link></li>
+                <li><Link to={dashboardPath} className="hover:text-primary transition-colors">Dashboard</Link></li>
+              </ul>
 
-    <div className="border-t !my-3"></div>
+              <div className="border-t border-gray-200 !my-2"></div>
 
-    <div className="flex flex-col gap-3">
-      <Link
-        to="/signin"
-        className="w-full border border-primary text-primary !py-2 rounded-lg text-center font-medium hover:bg-primary hover:text-white transition"
-      >
-        Sign Up
-      </Link>
-
-      <Link
-        to="/signup"
-        className="w-full bg-primary text-white !py-2 rounded-lg text-center font-medium hover:opacity-90 transition"
-      >
-       Sign In
-      </Link>
-    </div>
-
-  </div>
-</div>
-  </div>
-</div>
-      
+              <div className="grid grid-cols-1 gap-2.5">
+                <Link to="/auth" className="w-full border border-primary text-primary !py-2 rounded-lg text-center font-medium hover:bg-primary hover:text-white transition">
+                  Sign Up
+                </Link>
+                <Link to="/auth/login" className="w-full bg-primary text-white !py-2 rounded-lg text-center font-medium hover:opacity-90 transition">
+                  Sign In
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
   )
 }
 

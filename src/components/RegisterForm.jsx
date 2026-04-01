@@ -43,6 +43,7 @@ const RegisterForm = () => {
                 email:data.email,
                 designation:data.designation,
                 role:"user",
+                active:true,
                 createdAt:new Date()
             }
             axiosSecure.post("/users",userInfo)

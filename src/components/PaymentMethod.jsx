@@ -21,7 +21,7 @@ const methods=[
 
 const PaymentMethod = ({finalMethod,setFinalMethod,step,setStep }) => {
     const [method,setMethod]=useState("");
-    console.log(method);
+
     const handleProceed=()=>
     {
         setFinalMethod(method);
@@ -30,29 +30,29 @@ const PaymentMethod = ({finalMethod,setFinalMethod,step,setStep }) => {
         
     }
   return (
-    <div className="w-full flex flex-col justify-center gap-4 w-full lg:w-[70%] !mx-auto !mt-10 bg-white rounded-lg shadow-md !mb-10 !p-6">
-         <span className="text-2xl font-bold  flex items-center w-full !px-6    !mx-auto gap-2"> 
-            <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
+    <div className="flex flex-col justify-center gap-4 w-full max-w-4xl !mx-auto !mt-6 sm:!mt-8 lg:!mt-10 bg-white rounded-2xl border border-gray-200 shadow-sm !mb-8 sm:!mb-10 !p-4 sm:!p-6">
+         <div className="text-2xl font-bold flex items-start sm:items-center w-full gap-3"> 
+            <div className="text-primary !p-3 sm:!p-4 rounded-2xl bg-[#E9E7F7] shrink-0">
                 <CreditCard size={24} />
             </div> 
             <div className='flex flex-col items-start'>
-                <h2 className="text-2xl font-bold">Select Payment Method</h2>
+                <h2 className="text-xl sm:text-2xl font-bold leading-tight">Select Payment Method</h2>
                 <p className="text-sm text-gray-500">Choose your preferred payment method</p>
             </div>
-            </span>
+            </div>
 
      
-    <div className="grid grid-cols-2 !p-8 !py-6 lg:grid-cols-4 gap-4 gap-y-6 w-full !mx-auto "> 
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 !p-2 sm:!p-4 lg:!p-6 !py-4 sm:!py-6 gap-3 sm:gap-4 w-full !mx-auto"> 
         {methods.map((m, index) => (
-            <div onClick={() => setMethod(m.name)} key={index} className={`shadow-md group backdrop-blur-sm border  rounded-xl transition duration-500 hover:-translate-y-2 hover:shadow-xl transition-all duration-300 !p-4 flex flex-col items-center justify-center ${method === m.name ? "border-primary bg-primary/8 scale-105 ring-2 ring-primary" : "border-white/20 bg-white/10"}`}>
-                <div className="w-16 h-16 flex items-center justify-center">
-  <img src={m.logo} className="w-12 h-12 object-contain" />
+            <button type="button" onClick={() => setMethod(m.name)} key={index} className={`shadow-sm group border rounded-xl hover:-translate-y-1 hover:shadow-md transition-all duration-300 !p-3 sm:!p-4 flex flex-col items-center justify-center min-h-28 sm:min-h-32 ${method === m.name ? "border-primary bg-primary/8 scale-[1.02] ring-2 ring-primary" : "border-gray-200 bg-white"}`}>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+  <img src={m.logo} className="w-10 h-10 sm:w-12 sm:h-12 object-contain" />
 </div>
-                <p className="text-lg font-semibold mt-2">{m.name}</p>
-            </div>
+                <p className="text-sm sm:text-base font-semibold !mt-2 text-center">{m.name}</p>
+            </button>
         ))}
     </div>
-    <button onClick={handleProceed} className={`btn btn-primary w-[80%] !mx-auto !px-6 !py-3  ${method ? "" : "btn-disabled"}`}>Proceed to Pay</button>
+    <button onClick={handleProceed} className={`btn btn-primary w-full sm:w-[80%] !mx-auto !px-6 !py-3 ${method ? "" : "btn-disabled"}`}>Proceed to Pay</button>
     </div>
   )
 }

@@ -11,7 +11,9 @@ import Loading from '../components/Loading';
 const DashBoard = () => {
   const {user,loading}=useContext(AuthContext);
   const axiosSecure=useAxiosSecure();
-  const {data:dashBoardStats,isLoading,isFetching}=useQuery({
+  
+
+  const {data:dashBoardStats,isLoading}=useQuery({
     queryKey:["dashBoardStats",user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
@@ -47,8 +49,8 @@ const DashBoard = () => {
     },
     {
       title: 'Last Transaction',
-      amount: `Tk ${dashBoardStats?.lastPayment.totalAmount || 0}`,
-      change: `Paid on ${dashBoardStats?.lastPayment.paidAt ? new Date(dashBoardStats.lastPayment.paidAt).toLocaleDateString('en-GB') : 'N/A'}`,
+      amount: `Tk ${dashBoardStats?.lastPayment?.totalAmount || 0}`,
+      change: `Paid on ${dashBoardStats?.lastPayment?.paidAt ? new Date(dashBoardStats.lastPayment.paidAt).toLocaleDateString('en-GB') : 'N/A'}`,
       icon: DollarSign,
       positive: false,
     },
@@ -66,9 +68,10 @@ const DashBoard = () => {
   <Loading></Loading>)
 
   return (
-    <section className="flex-1 h-full bg-gray-50 !px-4 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200">
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 text:md lg:text-xl !mt-2 max-w-3xl">
+        <section className="flex-1 min-w-0 h-full bg-gray-50 !px-4 sm:!px-5 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200 md:border-l">
+          <div className="w-full max-w-7xl mx-auto">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 text-sm sm:text-base lg:text-xl !mt-2 max-w-3xl">
               Welcome back {user?.displayName} ! Here is your tax and payment overview.
             </p>
 
@@ -96,8 +99,8 @@ const DashBoard = () => {
               })}
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 !mt-9">Quick Actions</h2>
-            <div className="!mt-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 !mt-9">Quick Actions</h2>
+            <div className="!mt-5 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
               {quickActions.map((action) => {
                 const ActionIcon = action.icon
 
@@ -114,10 +117,8 @@ const DashBoard = () => {
               })}
             </div>
             <RecentTransaction></RecentTransaction>
-
-
-        
-          </section>
+          </div>
+        </section>
   )
 }
 

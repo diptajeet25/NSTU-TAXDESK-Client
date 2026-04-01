@@ -2,10 +2,11 @@ import React, { useContext, useState } from 'react'
 import useAxiosSecure from '../hooks/useAxiosSecure'
 import { AuthContext } from '../Context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { Calculator, CircleAlert, CircleCheckBig, Clock, CreditCard, FileText, Receipt, Search, Trash, Trash2 } from 'lucide-react';
+import { Calculator, CircleAlert, Clock, FileText, Receipt, Search } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
 import Loading from '../components/Loading';
+import Swal from 'sweetalert2';
 
 const PendingPayments = () => {
     const axiosSecure = useAxiosSecure();
@@ -49,6 +50,49 @@ const { data: pendingStats } = useQuery({
     })
     const {totalAmountSum,totalPending}=pendingStats || {};
 
+    const deletePending=async(id)=>
+    {
+
+      console.log(id);
+
+const swalWithBootstrapButtons = Swal.mixin({
+  customClass: {
+    confirmButton: "btn btn-success  !px-3 !py-2 !mx-2",
+    cancelButton: "btn btn-danger  !px-3 !py-2 !mx-2"
+  },
+  buttonsStyling: false
+});
+swalWithBootstrapButtons.fire({
+  title: "Are you sure?",
+  text: "You won't be able to revert this!",
+  icon: "warning",
+  showCancelButton: true,
+  confirmButtonText: "Yes, delete it!",
+  cancelButtonText: "No, cancel!",
+  reverseButtons: true
+}).then(async (result) => {
+  if (result.isConfirmed) 
+  {
+    const res=await axiosSecure.delete(`/payment?id=${id}`);
+    
+    if(res.data.deletedCount>0)
+    {
+      swalWithBootstrapButtons.fire({
+    title: "Deleted!",
+    text: "Your file has been deleted.",
+    icon: "success"
+  });
+    }
+  }
+  else if (result.dismiss === Swal.DismissReason.cancel) swalWithBootstrapButtons.fire({
+    title: "Cancelled",
+    text: "Deletion has been cancelled. :)",
+    icon: "error"
+  });
+});
+
+    }
+
 
     const hasPayments = pendingPayments?.length > 0;
 const isFiltering = search || category;
@@ -58,14 +102,16 @@ const isFiltering = search || category;
     <Loading />
     )
   return (
-       <section className="flex-1 h-full bg-gray-50 !px-4 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200">
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Pending Payments</h1>
-            <p className="text-gray-600 text:md lg:text-xl !mt-2 max-w-3xl">
+       <section className="flex-1 min-w-0 h-full bg-gray-50 !px-4 sm:!px-5 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200">
+          <div className="w-full max-w-7xl !mx-auto">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Pending Payments</h1>
+            <p className="text-gray-600 text-sm sm:text-base lg:text-xl !mt-2 max-w-3xl">
               View and complete your pending tax and VAT payments.
             </p>
-              <div className="!mt-4 rounded-xl !px-5 !mx-auto !py-5"> 
-                <div className="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-3 h-full gap-5 lg:!mx-12">
-                    <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
+
+            <div className="!mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 h-full gap-4 lg:gap-5">
+                    <div className="bg-white flex justify-between rounded-xl shadow-sm border border-gray-200 !p-4 !py-7">
                         <div className='flex flex-col  gap-2'>
                             <h2 className='text-gray-600'>Total Pending Amount</h2>
                             <p className="text-2xl font-bold text-gray-800">{ totalAmountSum ? totalAmountSum.toLocaleString('en-BD', { style: 'currency', currency: 'BDT' }) : 0}</p>
@@ -78,7 +124,7 @@ const isFiltering = search || category;
 
 
                     </div>
-                       <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
+                       <div className="bg-white flex justify-between rounded-xl shadow-sm border border-gray-200 !p-4 !py-7">
                         <div className='flex flex-col  gap-2'>
                             <h2 className='text-gray-600'>No. of Pending Payments</h2>
                             <p className="text-2xl font-bold text-gray-800">{totalPending ? totalPending: "0"}</p>
@@ -91,7 +137,7 @@ const isFiltering = search || category;
 
 
                     </div>
-                      <div className="bg-white flex  justify-between rounded-lg shadow !p-4 !py-8">
+                      <div className="bg-white flex justify-between rounded-xl shadow-sm border border-gray-200 !p-4 !py-7">
                         <div className='flex flex-col  gap-2'>
                             <h2 className='text-gray-600'>Last Pending Payments</h2>
                            <p className="text-2xl font-bold text-gray-800">{totalPending ? new Date(pendingStats.lastpending[0].createdAt).toLocaleDateString('en-GB') : "N/A"}</p>
@@ -108,7 +154,7 @@ const isFiltering = search || category;
 
 
               </div>
-              <div className={`w-full bg-white rounded-lg shadow-md grid grid-cols-1 lg:grid-cols-3 gap-4 !mt-4 !px-2 lg:!px-6 !py-12 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
+              <div className={`w-full bg-white rounded-xl shadow-sm border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4 !mt-6 !px-3 sm:!px-4 lg:!px-6 !py-6 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
    <div className='relative flex-1'>
             <Search size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400' />
             <input
@@ -117,13 +163,13 @@ const isFiltering = search || category;
               value={search}
               onChange={e => setSearch(e.target.value)}
           
-              className="rounded-lg w-full  bg-gray-200 border-black/10 !pl-8 !py-2"
+              className="rounded-lg w-full bg-gray-100 border border-gray-300 !pl-8 !py-2.5"
             />
           </div>
            
             <div className='flex flex-col gap-1 items-start '>
             
-            <select {...register("category")} value={category} onChange={e => setCategory(e.target.value)} className="rounded-lg w-full bg-gray-200 border-black/10 !pl-2 !py-2">
+            <select {...register("category")} value={category} onChange={e => setCategory(e.target.value)} className="rounded-lg w-full bg-gray-100 border border-gray-300 !pl-2 !py-2.5">
                 
             <option value="" className='text-black'>All</option>
                 <option value="service" className='text-black'>Service</option>
@@ -135,7 +181,7 @@ const isFiltering = search || category;
         </div>
                     <div >
             
-            <select {...register("sort")} value={sort} onChange={e => setSort(e.target.value)} className="rounded-lg w-full bg-gray-200 border-black/10 !pl-2 !py-2">
+            <select {...register("sort")} value={sort} onChange={e => setSort(e.target.value)} className="rounded-lg w-full bg-gray-100 border border-gray-300 !pl-2 !py-2.5">
                 <option value="newest" className='text-black'>Date (Newest First)</option>
                 <option value="oldest" className='text-black'>Date (Oldest First)</option>
                  <option value="high" className='text-black'>Amount (High to Low)</option>
@@ -146,14 +192,14 @@ const isFiltering = search || category;
         </div>
 
               </div>
-                     <div className={`w-full bg-white !mt-8 rounded-lg shadow-md flex flex-col !py-16 justify-center items-center gap-3 ${!hasPayments && !isFiltering ? "" : "hidden"}`}>
+                     <div className={`w-full bg-white !mt-8 rounded-xl shadow-sm border border-gray-200 flex flex-col !py-16 justify-center items-center gap-3 ${!hasPayments && !isFiltering ? "" : "hidden"}`}>
                              <div className="!p-4 rounded-full opacity-80 bg-gray-200"><p> <FileText size={48} /></p></div>
                                 <h2 className="text-2xl font-bold text-gray-800">No Pending Payments</h2>
                                           
                                            <p className="text-gray-600 opacity-80 text-center">You currently have no pending tax payments.</p>
                                            <Link to="/dashboard/tax-vatcalculator" className="btn btn-primary font-medium !mt-1 flex items-center  !px-4 !py-2 gap-1"><Calculator size={18} /> Calculate Tax & VAT</Link>
-                                           <div className="w-[80%] lg:w-[60%] !mx-auto flex justify-center !mt-3">
-  <div className="bg-[#E9E7F7] shadow-md text-sm flex items-start gap-2 text-black !px-4 !py-4 rounded-xl">
+                                           <div className="w-[90%] lg:w-[60%] !mx-auto flex justify-center !mt-3">
+  <div className="bg-[#E9E7F7] shadow-sm text-sm flex items-start gap-2 text-black !px-4 !py-4 rounded-xl">
     <CircleAlert className="w-5 h-5 !mt-0.5" />
     <span>
       <span className="font-bold">Getting Started :</span>{" "}
@@ -164,8 +210,8 @@ const isFiltering = search || category;
 </div>
                                         
                   </div>
-                  <div className={`!overflow-x-auto  min-w-full   !my-10 !mb-4 rounded-xl shadow-sm border border-gray-200 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
-        <table className="w-full text-sm text-left">
+                  <div className={`overflow-x-auto !my-8 !mb-4 rounded-xl shadow-sm border border-gray-200 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
+        <table className="min-w-[900px] w-full text-sm text-left">
           <thead>
             <tr className="bg-primary text-white">
              
@@ -206,11 +252,11 @@ const isFiltering = search || category;
         <td className="!px-4 !py-5 text-center font-semibold">{item.totalAmount}</td>
 
         <td className="!px-4 !py-5 text-center">
-          <div className="flex justify-center gap-2">
-            <Link to={`/payment/${item.id}`} className="btn btn-primary text-sm !px-3 !py-2">
+          <div className="flex flex-wrap justify-center gap-2">
+            <Link to={`/payment/${item.id}`} className="btn btn-primary text-sm !px-3 !py-2 whitespace-nowrap">
               Payment
             </Link>
-            <button className="btn btn-outline bg-white hover:bg-red-500 hover:text-white border border-red-400 text-sm !px-3 !py-2">
+            <button onClick={() => deletePending(item.id)} className="btn btn-outline bg-white hover:bg-red-500 hover:text-white border border-red-400 text-sm !px-3 !py-2 whitespace-nowrap">
               Delete
             </button>
           </div>
@@ -229,8 +275,8 @@ const isFiltering = search || category;
 </tbody>
         </table>
       </div>
-      <div className=" !mx-auto flex justify-center">
-      <div className="bg-white shadow-md text-sm flex items-start gap-2 text-black !px-4 !py-3 !mt-4 rounded-xl">
+      <div className="!mx-auto flex justify-center !mt-3">
+      <div className="bg-white shadow-sm border border-gray-200 text-sm flex items-start gap-2 text-black !px-4 !py-3 !mt-4 rounded-xl">
         <CircleAlert className="w-5 h-5 !mt-0.5" />
         <span>
           <span className="font-bold">Important Notice:</span>{" "}
@@ -238,7 +284,7 @@ const isFiltering = search || category;
       </div>
     </div>
 
-
+      </div>
         </section>
   )
 }

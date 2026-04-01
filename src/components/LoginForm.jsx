@@ -18,8 +18,8 @@ const LoginForm = () => {
             console.log("Login Successful");
             if(user.emailVerified)
             {
-                alert("Login Successful");
-                navigate("/dashboard");
+               
+                navigate("/dashboard/user");
             }
             else
             {

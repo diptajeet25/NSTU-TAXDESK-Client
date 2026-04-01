@@ -2,9 +2,11 @@ import React, { useContext, useEffect } from 'react'
 import logo from '../assets/nstu-logo.png'
 import { AuthContext } from '../Context/AuthContext'
 import { Menu } from 'lucide-react'
+import { Link } from 'react-router'
 
 const DashBoardNav = () => {
     const {user,toogle,setToogle}=useContext(AuthContext);
+    
     useEffect(()=>
     {
         console.log(user);
@@ -16,13 +18,22 @@ const DashBoardNav = () => {
     <Menu size={28} className="cursor-pointer" onClick={()=>setToogle(!toogle)} />
  
    
-    <img src={logo} alt="NSTU Logo" className="w-12 lg:w-14  h-12 lg:w-14 " />
-    <a className="font-bold text-primary text-lg lg:text-xl">NSTU TAXDESK</a>
+    <Link to="/" className="inline-flex items-center gap-1">
+      <img src={logo} alt="NSTU Logo" className="block h-11 w-11 shrink-0 object-contain lg:h-14 lg:w-14" />
+      <span className="font-bold leading-none text-primary text-base sm:text-lg lg:text-xl whitespace-nowrap">
+        NSTU TAXDESK
+      </span>
+    </Link>
   </div>
-  <div className="flex items-center gap-2">
+  <Link to="/" className="flex items-center gap-3 cursor-pointer">
     <img src={user?.photoURL} alt={user?.displayName} className="w-10 h-10 rounded-full" />
-    <h3>{user?.displayName}</h3>
-  </div>
+    <div className='flex flex-col '>
+          <h3 className='text-sm font-bold'>{user?.displayName}</h3>
+          <h5 className='text-xs text-primary font-bold'>Teacher</h5>
+
+    </div>
+
+  </Link>
 
     </div>
   )

@@ -19,6 +19,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PendingPayments from './Page/PendingPayments.jsx';
 import PaymentPage from './Page/PaymentPage.jsx';
 import PaymentHistory from './Page/PaymentHistory.jsx';
+import AdminDashBoard from './Page/AdminDashBoard.jsx';
+import Profile from './Page/Profile.jsx';
 
 document.documentElement.setAttribute('data-theme', 'light');
 
@@ -55,8 +57,12 @@ const router = createBrowserRouter([
     element:<DashboardLayout></DashboardLayout>,
     children:[
       {
-        path:'dashboard',
+        path:'user',
         element:<DashBoard></DashBoard>
+      },
+      {
+        path:'admin',
+        element:<AdminDashBoard></AdminDashBoard>
       },
       {
         path:"tax-vatcalculator",
@@ -69,6 +75,10 @@ const router = createBrowserRouter([
       {
         path:"payment-history",
         element:<PaymentHistory></PaymentHistory>
+      },
+      {
+        path:"profile",
+        element:<Profile></Profile>
       }
       
     ]
