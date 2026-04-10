@@ -1,14 +1,19 @@
 import { CircleAlert, Eye, EyeOff, Shield } from 'lucide-react';
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { AuthContext } from '../Context/AuthContext';
 import { sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
 import { Link, useNavigate } from 'react-router';
 import useAxiosSecure from '../hooks/useAxiosSecure';
+import { useQuery } from '@tanstack/react-query';
 
 const RegisterForm = () => {
-    const {register, handleSubmit,getValues, formState: { errors }} = useForm();
+    const {register,watch,resetField ,handleSubmit,getValues, formState: { errors }} = useForm();
+   const designation=watch("designation");
+   useEffect(() => {
+  resetField("department"); 
+}, [designation]);
     const navigate=useNavigate();
     const {user,setUser,createUser,userDetails,setUserDetails}=useContext(AuthContext);
       const [showPassword, setShowPassword] = useState(false);
@@ -42,6 +47,7 @@ const RegisterForm = () => {
                 photourl:imageData.data.url,
                 email:data.email,
                 designation:data.designation,
+                department:data.department,
                 role:"user",
                 active:true,
                 createdAt:new Date()
@@ -65,7 +71,7 @@ const RegisterForm = () => {
             }
             );
             navigate("/verify-email");
-   console.log("Verification Email Sent");
+   
     
                 
                        
@@ -76,6 +82,17 @@ const RegisterForm = () => {
     console.log(error);
                 })
           }
+          const {data:entities}=useQuery(
+            {
+                queryKey:["entities",designation],
+                enabled:!!designation,
+                queryFn:async()=>{
+                    const res=await axiosSecure.get(`/entities?designation=${designation}`);
+                    console.log(res.data);
+                    return res.data;
+            }
+        }
+          )
       
   return (
     <div className='bg-white rounded-xl w-[90%] lg:w-[60%] !mx-auto !py-6 mt-10 flex flex-col items-start gap-3 shadow-md !px-4'>
@@ -103,13 +120,24 @@ const RegisterForm = () => {
         </div>
             <div className='flex flex-col gap-1 items-start w-full '>
             <label className="font-bold !px-1">Designation</label>
-            <select {...register("designation", { required: "Designation is required" })} className="rounded-lg w-[95%] bg-gray-200 border-black/10 !pl-2 !py-2">
+            <select {...register("designation", {  required: "Designation is required" })} className="rounded-lg w-[95%] bg-gray-200 border-black/10 !pl-2 !py-2">
                 <option value="">Select your Designation</option>
                 <option value="teacher">Teacher</option>
                 <option value="officer">Officer</option>
                 <option value="staff">Staff</option>
             </select>
             {errors.designation && <p className="text-red-500 text-sm">{errors.designation.message}</p>}
+        </div>
+                    <div className='flex flex-col gap-1 items-start w-full '>
+            <label className="font-bold !px-1">Department/Section</label>
+           <select {...register("department", {  required: "Department/Section is required" })}
+  disabled={!designation}
+  className={`rounded-lg w-[95%] border-black/10 !pl-2 !py-2 ${!designation ? "bg-gray-100 text-gray-500 cursor-not-allowed opacity-90"  : "bg-gray-200 text-black"}`}>
+                <option value="">Select your Department/Section</option>
+                {entities?.map(entity=><option key={entity._id} value={entity.name}>{entity.name}</option>)
+                }
+            </select>
+            {errors.department && <p className="text-red-500 text-sm">{errors.department.message}</p>}
         </div>
          <div className='flex flex-col gap-1 items-start w-full '>
             <label className="font-bold !px-1">Password</label>
