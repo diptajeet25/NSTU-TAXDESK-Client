@@ -15,7 +15,7 @@ const DashBoard = () => {
 
   const {data:dashBoardStats,isLoading}=useQuery({
     queryKey:["dashBoardStats",user?.email],
-    enabled: !!user?.email,
+    enabled: !loading && !!user?.email,
     queryFn: async () => {
       const res=await axiosSecure.get(`/dashboard-stats?email=${user?.email}`);
       console.log(res.data);

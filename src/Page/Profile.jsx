@@ -3,15 +3,16 @@ import React, { useContext } from 'react'
 import { AuthContext } from '../Context/AuthContext'
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../hooks/useAxiosSecure';
+import Loading from '../components/Loading';
 
 const Profile = () => {
-  const {user}=useContext(AuthContext);
+  const {user,loading}=useContext(AuthContext);
   console.log(user);
   const axiosSecure=useAxiosSecure();
-  const {data:profileInfo}=useQuery(
+  const {data:profileInfo,isLoading}=useQuery(
     {
-      queryKey:["profileInfo",user.email],
-      enabled:!!user?.email,
+      queryKey:["profileInfo",user?.email],
+      enabled:!loading && !!user?.email,
       queryFn:async()=>{
         const res=await axiosSecure.get(`/profile?email=${user.email}`);
         return res.data;
@@ -19,6 +20,9 @@ const Profile = () => {
     }
   )
   console.log(profileInfo);
+  if(loading || isLoading) {
+    return <Loading></Loading>
+  }
   return (
     <section className="flex-1 min-w-0 h-full bg-gray-50 !px-4 sm:!px-5 lg:!px-7 !py-5 lg:!py-7 overflow-auto hide-scrollbar border-l border-gray-200">
           <div className="w-full max-w-7xl !mx-auto">

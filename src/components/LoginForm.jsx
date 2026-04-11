@@ -3,38 +3,63 @@ import React, { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { AuthContext } from '../Context/AuthContext';
 import { Link, useNavigate } from 'react-router';
+import useAxiosSecure from '../hooks/useAxiosSecure';
+import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 const LoginForm = () => {
-    const { register, handleSubmit,getValues, formState: { errors }} = useForm();
-    const {loginUser,user,logoutUser}=useContext(AuthContext);
+  const { register, handleSubmit, formState: { errors }} = useForm();
+    const {loginUser,logoutUser}=useContext(AuthContext);
     const navigate=useNavigate();
+    const axiosSecure=useAxiosSecure();
+    const queryClient = useQueryClient();
+    const [load,setLoad]=useState(false);
+   
+    
     const [showPassword, setShowPassword] = useState(false);
-    const handleLogin=(data)=>
+    const handleLogin=async(data)=>
     {
-       
-        loginUser(data.email, data.password)
-        .then(()=>
-        {
-            console.log("Login Successful");
-            if(user.emailVerified)
-            {
-               
-                navigate("/dashboard/user");
-            }
-            else
-            {
-                logoutUser().then(()=>
-                {
-                    alert("Please verify your email before logging in");
-                    navigate('/auth/login');
-                })
-            }
+        setLoad(true);
+        try {
+          const validityRes = await axiosSecure.get(`/loginValidity?email=${data.email}`);
+          if(validityRes.data.message==="User not found")
+          {
+              toast.error("User not found. Please check your email or register for a new account.");
+              return;
+          }
+          if(!validityRes.data.active)
+          {
+              toast.error("Your account is temporary deactivated. Please contact the administrator for more information.");
+              return;
+          }
 
-        })
-        .catch((error)=>
-        {
-            console.error("Login Failed", error);
-        });
+          const credential = await loginUser(data.email, data.password);
+          const loggedInUser = credential.user;
+
+          if(loggedInUser?.emailVerified)
+          {
+              await axiosSecure.patch(`/users/lastLogin?email=${loggedInUser.email}`);
+
+              await queryClient.invalidateQueries();
+              await queryClient.refetchQueries({
+                predicate: (query) => Array.isArray(query.queryKey) && query.queryKey.includes(loggedInUser.email),
+              });
+
+              toast.success("Login successful!");
+              navigate("/dashboard/user");
+          }
+          else
+          {
+              await logoutUser();
+              toast.error("Please verify your email before logging in.");
+              navigate('/auth/login');
+          }
+        } catch (error) {
+          console.error("Login Failed", error);
+          toast.error("Login failed. Please check your credentials and try again.");
+        } finally {
+          setLoad(false);
+        }
     }
   return (
    <div className='bg-white rounded-xl w-[90%] min-h-[60vh] lg:w-[60%] !mx-auto !py-6 !mt-12 flex flex-col items-start gap-3 shadow-md !px-4'>
@@ -66,7 +91,9 @@ const LoginForm = () => {
             {errors.password?.type === "pattern" && <p className="text-red-500 text-sm">Password must contain at least one uppercase letter, one special character, and one number</p>}
         </div>
           <Link to="/auth/forget-password" className="text-sm text-primary">Forget Password </Link>
-                <button type="submit" className="bg-primary text-white rounded-lg w-[95%] !py-2 !mt-2">Login</button>
+                <button type="submit" className="bg-primary cursor-pointer text-white rounded-lg w-[95%] !py-2 !mt-2">
+                {load ? "Logging in..." : "Login"}
+                </button>
         <span className="text-sm text-gray-600 text-center"> Don't have an account? <Link to="/auth" className="text-primary font-bold">Register here</Link></span>
              <div className='w-[90%] !mx-auto'>
         <hr className='w-full h-0.1 bg-gray-600 !my-1 '></hr>

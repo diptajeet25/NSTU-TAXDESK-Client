@@ -21,6 +21,7 @@ import PaymentPage from './Page/PaymentPage.jsx';
 import PaymentHistory from './Page/PaymentHistory.jsx';
 import AdminDashBoard from './Page/AdminDashBoard.jsx';
 import Profile from './Page/Profile.jsx';
+import { Toaster } from 'react-hot-toast';
 
 document.documentElement.setAttribute('data-theme', 'light');
 
@@ -98,6 +99,35 @@ createRoot(document.getElementById('root')).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
        <RouterProvider router={router} />
+      <Toaster
+  position="top-right"
+  toastOptions={{
+    style: {
+      background: '#111827',
+      color: '#fff',
+      borderRadius: '10px',
+      padding: '12px 16px',
+      fontSize: '14px',
+    },
+
+    success: {
+      iconTheme: {
+        primary: '#22c55e',
+        secondary: '#fff',
+      },
+    },
+
+    error: {
+      style: {
+        border: '1px solid rgba(239,68,68,0.4)',
+      },
+      iconTheme: {
+        primary: '#ef4444',
+        secondary: '#fff',
+      },
+    },
+  }}
+/>
     </AuthProvider>
     </QueryClientProvider>
 

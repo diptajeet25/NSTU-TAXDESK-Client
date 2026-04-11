@@ -6,18 +6,24 @@ import useAxiosSecure from '../hooks/useAxiosSecure'
 import AdminBarChart from '../components/AdminBarChart'
 import AdminLineChart from '../components/AdminLineChart'
 import AdminPieChart from '../components/AdminPieChart'
+import Loading from '../components/Loading'
 
 const AdminDashBoard = () => {
-  const {user}=useContext(AuthContext);
+  const {user,loading}=useContext(AuthContext);
     const axiosSecure=useAxiosSecure();
-    const {data:adminDashBoardStats}=useQuery({
+    const {data:adminDashBoardStats,isLoading}=useQuery({
         queryKey:['admindashBoardStat',user?.email],
+        enabled: !loading && !!user?.email,
         queryFn:async()=>{
             const res=await axiosSecure.get(`/adminstats?email=${user.email}`)
             console.log(res.data);
             return res.data;
         }
     })
+ if(loading || isLoading)
+ {
+   return <Loading></Loading>
+ }
  const summaryCards = [
   {
     title: 'Total Users',

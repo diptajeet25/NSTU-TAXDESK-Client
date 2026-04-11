@@ -2,10 +2,19 @@ import React, { useContext } from 'react'
 import DashBoardNav from '../components/DashBoardNav'
 import { DashBoardDrawer } from '../components/DashBoardDrawer'
 import { AuthContext } from '../Context/AuthContext'
-import { Outlet } from 'react-router'
+import { Navigate, Outlet } from 'react-router'
+import Loading from '../components/Loading'
 
 const DashboardLayout = () => {
-  const { toogle, setToogle } = useContext(AuthContext)
+  const { toogle, setToogle, loading, user } = useContext(AuthContext)
+
+  if (loading) {
+    return <Loading></Loading>
+  }
+
+  if (!user) {
+    return <Navigate to="/auth/login" replace />
+  }
 
 
   return (

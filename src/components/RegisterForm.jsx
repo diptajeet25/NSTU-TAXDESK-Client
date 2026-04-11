@@ -7,6 +7,7 @@ import { auth } from '../Firebase/firebase.init';
 import { Link, useNavigate } from 'react-router';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
+import { last } from 'firebase/firestore/pipelines';
 
 const RegisterForm = () => {
     const {register,watch,resetField ,handleSubmit,getValues, formState: { errors }} = useForm();
@@ -50,7 +51,9 @@ const RegisterForm = () => {
                 department:data.department,
                 role:"user",
                 active:true,
-                createdAt:new Date()
+                calculationCount:0,
+                createdAt:new Date(),
+                lastLogin:new Date()
             }
             axiosSecure.post("/users",userInfo)
             .then((res)=>
