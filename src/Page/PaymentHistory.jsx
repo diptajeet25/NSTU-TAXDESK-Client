@@ -5,6 +5,9 @@ import { useForm } from 'react-hook-form';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { AuthContext } from '../Context/AuthContext';
 import Loading from '../components/Loading';
+import jsPDF from 'jspdf';
+import toast from 'react-hot-toast';
+import { buildReceiptPdf } from '../utils/receiptPdf';
 
 const PaymentHistory = () => {
     const {register}=useForm();
@@ -13,12 +16,34 @@ const PaymentHistory = () => {
     const [search,setSearch]=useState("");
     const [category,setCategory]=useState("");
     const [sort,setSort]=useState("newest");
+    const [downloadingId, setDownloadingId] = useState(null);
+
+    const handleDirectDownload = async (paymentId) => {
+      try {
+        setDownloadingId(paymentId);
+
+        const res = await axiosSecure.get(`/receipt?id=${paymentId}`);
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        buildReceiptPdf(pdf, {
+          id: paymentId,
+          user,
+          receiptData: res.data,
+        });
+
+        pdf.save(`receipt-${paymentId}.pdf`);
+        toast.success('Receipt downloaded');
+      } catch (error) {
+        console.error('Direct receipt download failed:', error);
+        toast.error('Failed to download receipt PDF');
+      } finally {
+        setDownloadingId(null);
+      }
+    };
     const {data:transactions,isFetching,isLoading}=useQuery({
         queryKey:["paymentHistory",search,category,sort],
         enabled: !!user?.email,
         queryFn: async () => {
             const res=await axiosSecure.get(`/payment-history?email=${user?.email}&search=${search}&category=${category}&sort=${sort}`);
-            console.log(res.data);
             return res.data;
         }
 
@@ -29,8 +54,6 @@ const PaymentHistory = () => {
         enabled: !!user?.email,
         queryFn: async () => {
             const res=await axiosSecure.get(`/payment-stats?email=${user?.email}`);
-            
-            console.log(res.data);
             return res.data;
         }
 
@@ -45,6 +68,7 @@ const PaymentHistory = () => {
   return `${day}-${month}-${year}`;
 };
       const hasPayments = transactions?.length > 0;
+
 const isFiltering = search || category;
 if(loading || isLoading)
     return (
@@ -146,48 +170,52 @@ if(loading || isLoading)
           <thead>
             <tr className="bg-primary text-white">
               
-              <th className="!px-4 !py-4 font-semibold text-md">Payment ID</th>
-              <th className="!px-4 !py-4 font-semibold text-md">Payment Date</th>
-              <th className="!px-4 !py-4 font-semibold text-md">Product/Service Name</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Type</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Base Amount</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">VAT </th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Tax </th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Paid Amount</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Payment Method</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Action</th>
+              <th className="!px-3 !py-4 font-semibold text-md">Payment ID</th>
+              <th className="!px-3 !py-4 font-semibold text-md">Payment Date</th>
+              <th className="!px-3 !py-4 font-semibold text-md">Product/Service Name</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Type</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Base Amount</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">VAT </th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Tax </th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Paid Amount</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Payment Method</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Action</th>
             </tr>
           </thead>
         <tbody className="bg-white divide-y divide-gray-100">
 
   {isFetching || isLoading ? (
     <tr>
-      <td colSpan={9} className="!px-4 !py-10 text-center text-gray-400">
+      <td colSpan={9} className="!px-3 !py-10 text-center text-gray-400">
         Updating...
       </td>
     </tr>
   ) : transactions?.length > 0 ? (
 
-    transactions.map((item, i) => (
+    transactions.map((item) => (
       <tr key={item.id} className="hover:bg-indigo-50/40 transition-colors">
        
-        <td className="!px-4 !py-5 text-center">{item.id}</td>
-        <td className="!px-4 !py-5 text-center whitespace-nowrap">
+        <td className="!px-3 !py-5 text-center">{item.id}</td>
+        <td className="!px-3 !py-5 text-center whitespace-nowrap">
           {formatDate(item.paidAt)}
         </td>
-        <td className="!px-4 !py-5 text-center">{item.name}</td>
+        <td className="!px-3 !py-5 text-center">{item.name}</td>
 
-        <td className="!px-4 !py-5 text-center">{item.category}</td>
-        <td className="!px-4 !py-5 text-center font-semibold">{item.baseAmount}</td>
-        <td className="!px-4 !py-5 text-center">{item.vatAmount}</td>
-        <td className="!px-4 !py-5 text-center">{item.taxAmount}</td>
-        <td className="!px-4 !py-5 text-center font-semibold">{item.totalAmount}</td>
-        <td className="!px-4 !py-5 text-center">{item.method}</td>
+        <td className="!px-3 !py-5 text-center">{item.category}</td>
+        <td className="!px-3 !py-5 text-center font-semibold">{item.baseAmount}</td>
+        <td className="!px-3 !py-5 text-center">{item.vatAmount}</td>
+        <td className="!px-3 !py-5 text-center">{item.taxAmount}</td>
+        <td className="!px-3 !py-5 text-center font-semibold">{item.totalAmount}</td>
+        <td className="!px-3 !py-5 text-center">{item.method}</td>
 
-        <td className="!px-4 !py-5 text-center">
+        <td className="!px-3 !py-5 text-center">
          
-            <button className="btn btn-primary hover:bg-red-500 text-sm !px-3 !py-2">
-              Download Receipt
+            <button
+              onClick={() => handleDirectDownload(item.id)}
+              disabled={downloadingId === item.id}
+              className="btn btn-primary text-xs !px-3 !py-2 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {downloadingId === item.id ? 'Downloading...' : 'Download Receipt'}
             </button>
      
         </td>
@@ -196,7 +224,7 @@ if(loading || isLoading)
 
   ) : (
     <tr>
-      <td colSpan={10} className="!px-4 !py-10 text-center text-gray-400">
+      <td colSpan={10} className="!px-3 !py-10 text-center text-gray-400">
         No results found
       </td>
     </tr>
@@ -205,7 +233,9 @@ if(loading || isLoading)
 </tbody>
         </table>
       </div>
+
       </div>
+
     </section>
   )
 }

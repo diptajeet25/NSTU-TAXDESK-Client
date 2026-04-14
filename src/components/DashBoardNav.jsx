@@ -9,8 +9,6 @@ const DashBoardNav = () => {
     
     useEffect(()=>
     {
-        console.log(user);
-
     },[user])
   return (
       <div className="max-w-7xl mx-auto flex justify-between items-center !px-4 !py-1 !mb-0.5 sticky z-40 top-0 shadow-sm bg-white backdrop-blur-sm rounded-lg">

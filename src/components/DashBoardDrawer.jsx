@@ -1,16 +1,35 @@
-import { Calculator, Clock4, CreditCard, FileChartColumnIncreasing, FileText, History, LayoutDashboard, Receipt, Settings, SettingsIcon, User, Users } from 'lucide-react'
-import React, { useContext } from 'react'
+import { Calculator, Clock4, FileChartColumnIncreasing, FileText, History, LayoutDashboard, LogOut, Receipt, SettingsIcon, User, Users } from 'lucide-react'
+import React, { useContext, useState } from 'react'
 import { AuthContext } from '../Context/AuthContext'
-import { NavLink } from 'react-router'
+import { NavLink, useNavigate } from 'react-router'
 import useRole from '../hooks/useRole'
+import toast from 'react-hot-toast'
 
 export const DashBoardDrawer = () => {
-  const { toogle, setToogle } = useContext(AuthContext)
+  const { toogle, setToogle, logoutUser } = useContext(AuthContext)
   const {role}=useRole();
+  const navigate = useNavigate();
+  const [isLoggingOut,setIsLoggingOut]=useState(false);
 
   const closeDrawerOnMobile = () => {
     if (window.innerWidth < 1024) {
       setToogle(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await logoutUser();
+      toast.success('Logged out successfully.');
+      closeDrawerOnMobile();
+      navigate('/auth/login');
+    } catch (error) {
+      console.error(error);
+      toast.error('Logout failed. Please try again.');
+    } finally {
+      setIsLoggingOut(false);
     }
   }
 
@@ -62,6 +81,14 @@ export const DashBoardDrawer = () => {
       </NavLink>
   
 
+      <button type="button" onClick={handleLogout} disabled={isLoggingOut} className={`group flex w-full items-center rounded-xl !px-2 !py-2 text-left transition-all duration-200 ${toogle ? 'justify-start gap-2.5' : 'justify-center'} text-red-600 hover:bg-red-50 disabled:opacity-70`}>
+      <span className={`flex h-5 w-5 items-center justify-center transition-colors duration-200 `}><LogOut size={19} strokeWidth={2.15} /></span>
+       <span
+            className={`whitespace-nowrap text-base lg:text-[1.12rem] font-medium leading-none transition-opacity duration-200 ${toogle ? 'opacity-100' : 'hidden opacity-0'}`}
+          >{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+      </button>
+
+
       </nav> :  <nav className="flex flex-col gap-1.5 overflow-auto hide-scrollbar">
       <NavLink onClick={closeDrawerOnMobile} to="/dashboard/user" className={ ({ isActive }) => `group flex w-full items-center rounded-xl !px-2 !py-2 text-left transition-all duration-200 ${toogle ? 'justify-start gap-2.5' : 'justify-center'} ${isActive ? "bg-primary !text-white" : "text-gray-700"}`}>
       <span className={`flex h-5 w-5 items-center justify-center transition-colors duration-200 `}><LayoutDashboard size={19} strokeWidth={2.15} /></span>
@@ -99,6 +126,13 @@ export const DashBoardDrawer = () => {
             className={`whitespace-nowrap text-[1.12rem] font-medium leading-none transition-opacity duration-200 ${toogle ? 'opacity-100' : 'hidden opacity-0'}`}
           >Tax & VAT Rates</span>
       </NavLink>
+
+      <button type="button" onClick={handleLogout} disabled={isLoggingOut} className={`group flex w-full items-center rounded-xl !px-2 !py-2 text-left transition-all duration-200 ${toogle ? 'justify-start gap-2.5' : 'justify-center'} text-red-600 hover:bg-red-50 disabled:opacity-70`}>
+      <span className={`flex h-5 w-5 items-center justify-center transition-colors duration-200 `}><LogOut size={19} strokeWidth={2.15} /></span>
+       <span
+            className={`whitespace-nowrap text-base lg:text-[1.12rem] font-medium leading-none transition-opacity duration-200 ${toogle ? 'opacity-100' : 'hidden opacity-0'}`}
+          >{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+      </button>
 
       </nav>
     } 

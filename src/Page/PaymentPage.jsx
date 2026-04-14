@@ -15,7 +15,6 @@ const PaymentPage = () => {
     const {paymentId} = useParams();
     const axiosSecure=useAxiosSecure();
     const {user,loading}=useContext(AuthContext);
-    console.log(paymentId);
     
     const [finalMethod,setFinalMethod]=useState("");
     const [step,setStep]=useState(1);
@@ -30,7 +29,6 @@ const PaymentPage = () => {
       }
       
     })
-    console.log(paymentData);
     if(loading || !paymentData || loading)
       return <Loading></Loading>
   return (

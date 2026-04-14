@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Shield } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, Shield } from 'lucide-react';
 import React, { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { AuthContext } from '../Context/AuthContext';
@@ -91,7 +91,8 @@ const LoginForm = () => {
             {errors.password?.type === "pattern" && <p className="text-red-500 text-sm">Password must contain at least one uppercase letter, one special character, and one number</p>}
         </div>
           <Link to="/auth/forget-password" className="text-sm text-primary">Forget Password </Link>
-                <button type="submit" className="bg-primary cursor-pointer text-white rounded-lg w-[95%] !py-2 !mt-2">
+                <button type="submit" disabled={load} aria-busy={load} className="bg-primary cursor-pointer text-white rounded-lg w-[95%] !py-2 !mt-2 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                {load && <RefreshCw size={18} className="animate-spin" />}
                 {load ? "Logging in..." : "Login"}
                 </button>
         <span className="text-sm text-gray-600 text-center"> Don't have an account? <Link to="/auth" className="text-primary font-bold">Register here</Link></span>

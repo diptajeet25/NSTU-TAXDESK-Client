@@ -22,15 +22,12 @@ const methods = [
 ]
 
 const Mobile = ({ finalMethod, phone, setPhone, setStep }) => {
-  console.log(finalMethod)
   const { register, handleSubmit, formState: { errors } } = useForm()
 
   const normalize = (v) => String(v ?? '').trim().toLowerCase()
   const selectedMethod = methods.find(
     (m) => normalize(m.name) === normalize(finalMethod)
   )
-
-  console.log(selectedMethod)
 
   const handlePhone = (data) => {
     setPhone(data.phone)

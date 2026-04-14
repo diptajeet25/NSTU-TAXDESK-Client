@@ -1,12 +1,33 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import logo from '../assets/nstu-logo.png'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import useRole from '../hooks/useRole';
-import { Menu } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
+import { AuthContext } from '../Context/AuthContext';
+import toast from 'react-hot-toast';
 
 function Navbar() {
+  const { user, logoutUser } = useContext(AuthContext);
+  const isVerifiedUser = !!user && user.emailVerified;
   const {role}=useRole();
+  const navigate = useNavigate();
+  const [isLoggingOut,setIsLoggingOut]=useState(false);
   const dashboardPath = role === "admin" ? "/dashboard/admin" : "/dashboard/user";
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await logoutUser();
+      toast.success("Logged out successfully.");
+      navigate('/auth/login');
+    } catch (error) {
+      console.error(error);
+      toast.error("Logout failed. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200">
@@ -28,8 +49,16 @@ function Navbar() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-2.5">
-            <Link to="/auth" className="btn btn-outline btn-primary !px-5 !py-0">Sign Up</Link>
-            <Link to="/auth/login" className="btn btn-primary !px-5 !py-0">Sign In</Link>
+            {isVerifiedUser ? (
+              <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="btn btn-primary !px-5 !py-0">
+                <LogOut size={18} /> {isLoggingOut ? 'Logging out...' : 'Logout'}
+              </button>
+            ) : (
+              <>
+                <Link to="/auth" className="btn btn-outline btn-primary !px-5 !py-0">Sign Up</Link>
+                <Link to="/auth/login" className="btn btn-primary !px-5 !py-0">Sign In</Link>
+              </>
+            )}
           </div>
 
           <div className="dropdown dropdown-end lg:hidden">
@@ -47,12 +76,20 @@ function Navbar() {
               <div className="border-t border-gray-200 !my-2"></div>
 
               <div className="grid grid-cols-1 gap-2.5">
-                <Link to="/auth" className="w-full border border-primary text-primary !py-2 rounded-lg text-center font-medium hover:bg-primary hover:text-white transition">
-                  Sign Up
-                </Link>
-                <Link to="/auth/login" className="w-full bg-primary text-white !py-2 rounded-lg text-center font-medium hover:opacity-90 transition">
-                  Sign In
-                </Link>
+                {isVerifiedUser ? (
+                  <button type="button" onClick={handleLogout} disabled={isLoggingOut} className="w-full bg-primary text-white !py-2 rounded-lg text-center font-medium hover:opacity-90 transition disabled:opacity-70">
+                    {isLoggingOut ? 'Logging out...' : 'Logout'}
+                  </button>
+                ) : (
+                  <>
+                    <Link to="/auth" className="w-full border border-primary text-primary !py-2 rounded-lg text-center font-medium hover:bg-primary hover:text-white transition">
+                      Sign Up
+                    </Link>
+                    <Link to="/auth/login" className="w-full bg-primary text-white !py-2 rounded-lg text-center font-medium hover:opacity-90 transition">
+                      Sign In
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

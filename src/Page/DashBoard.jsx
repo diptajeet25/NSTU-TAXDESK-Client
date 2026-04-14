@@ -18,7 +18,6 @@ const DashBoard = () => {
     enabled: !loading && !!user?.email,
     queryFn: async () => {
       const res=await axiosSecure.get(`/dashboard-stats?email=${user?.email}`);
-      console.log(res.data);
       return res.data ;
     }
   })

@@ -16,7 +16,6 @@ const AdminDashBoard = () => {
         enabled: !loading && !!user?.email,
         queryFn:async()=>{
             const res=await axiosSecure.get(`/adminstats?email=${user.email}`)
-            console.log(res.data);
             return res.data;
         }
     })

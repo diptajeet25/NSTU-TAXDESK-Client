@@ -7,6 +7,7 @@ import Loading from '../components/Loading'
 
 const DashboardLayout = () => {
   const { toogle, setToogle, loading, user } = useContext(AuthContext)
+  const isVerifiedUser = !!user && user.emailVerified;
 
   if (loading) {
     return <Loading></Loading>
@@ -14,6 +15,10 @@ const DashboardLayout = () => {
 
   if (!user) {
     return <Navigate to="/auth/login" replace />
+  }
+
+  if (!isVerifiedUser) {
+    return <Navigate to="/verify-email" replace />
   }
 
 

@@ -1,15 +1,33 @@
-import { Clock, FileText, Mail, Receipt } from 'lucide-react'
-import React, { useContext } from 'react'
+import { Mail, Save, User } from 'lucide-react'
+import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../Context/AuthContext'
 import { useQuery } from '@tanstack/react-query';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import Loading from '../components/Loading';
+import { updateProfile } from 'firebase/auth';
+import { auth } from '../Firebase/firebase.init';
+import toast from 'react-hot-toast';
+import AccountStatusCards from '../components/AccountStatusCards';
+import ProfileStatsCards from '../components/ProfileStatsCards';
+import { useForm } from 'react-hook-form';
 
 const Profile = () => {
-  const {user,loading}=useContext(AuthContext);
-  console.log(user);
+  const {user,loading,setUser,setUserDetails}=useContext(AuthContext);
+  const [isEditing, setIsEditing] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const { register, handleSubmit, reset, watch, setValue } = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+      designation: '',
+      department: '',
+      photourl: ''
+    }
+  });
   const axiosSecure=useAxiosSecure();
-  const {data:profileInfo,isLoading}=useQuery(
+  const {data:profileInfo,isLoading,refetch}=useQuery(
     {
       queryKey:["profileInfo",user?.email],
       enabled:!loading && !!user?.email,
@@ -19,7 +37,133 @@ const Profile = () => {
       }
     }
   )
-  console.log(profileInfo);
+
+  const designationValue = watch('designation');
+  const departmentValue = watch('department');
+
+  const { data: entities = [] } = useQuery({
+    queryKey: ["entities", designationValue],
+    enabled: isEditing && !!designationValue,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/entities?designation=${designationValue}`);
+      return res.data;
+    }
+  });
+
+  useEffect(() => {
+    if (!profileInfo) return;
+    reset({
+      name: profileInfo?.name || '',
+      email: profileInfo?.email || '',
+      designation: profileInfo?.designation || '',
+      department: profileInfo?.department || '',
+      photourl: profileInfo?.photourl || ''
+    });
+  }, [profileInfo, reset]);
+
+  const startEditing = () => {
+    reset({
+      name: profileInfo?.name || '',
+      email: profileInfo?.email || '',
+      designation: profileInfo?.designation || '',
+      department: profileInfo?.department || '',
+      photourl: profileInfo?.photourl || ''
+    });
+    setImageFile(null);
+    setPreviewImage('');
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    if (previewImage) {
+      URL.revokeObjectURL(previewImage);
+    }
+    reset({
+      name: profileInfo?.name || '',
+      email: profileInfo?.email || '',
+      designation: profileInfo?.designation || '',
+      department: profileInfo?.department || '',
+      photourl: profileInfo?.photourl || ''
+    });
+    setImageFile(null);
+    setPreviewImage('');
+    setIsEditing(false);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setImageFile(file);
+    if (previewImage) {
+      URL.revokeObjectURL(previewImage);
+    }
+    if (!file) {
+      setPreviewImage('');
+      return;
+    }
+    setPreviewImage(URL.createObjectURL(file));
+  };
+
+  const saveProfile = async (data) => {
+    if (!isEditing) return;
+
+    setIsSaving(true);
+    try {
+      const payload = { ...data };
+
+      if (imageFile) {
+        const formdata = new FormData();
+        formdata.append("image", imageFile);
+        const uploadUrl = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_hosting_key}`;
+        const uploadRes = await fetch(uploadUrl, {
+          method: "POST",
+          body: formdata
+        });
+        const imageData = await uploadRes.json();
+        payload.photourl = imageData?.data?.url || payload.photourl;
+      }
+      let updateRes;
+      try {
+        updateRes = await axiosSecure.patch(`/profile?email=${user?.email}`, payload);
+      } catch {
+        updateRes = await axiosSecure.patch(`/users?email=${user?.email}`, payload);
+      }
+
+      const modifiedCount = updateRes?.data?.modifiedCount;
+      const matchedCount = updateRes?.data?.matchedCount;
+      if (typeof modifiedCount === 'number' && modifiedCount === 0 && typeof matchedCount === 'number' && matchedCount === 0) {
+        throw new Error('No matching user found for update');
+      }
+      if (auth.currentUser && payload.photourl) {
+        await updateProfile(auth.currentUser, {
+          displayName: payload.name,
+          photoURL: payload.photourl
+        });
+      }
+      if (auth.currentUser) {
+        const updatedAuthUser = {
+          ...auth.currentUser,
+          displayName: payload.name || auth.currentUser.displayName,
+          photoURL: payload.photourl || auth.currentUser.photoURL
+        };
+        setUser(updatedAuthUser);
+        setUserDetails(updatedAuthUser);
+      }
+
+      await refetch();
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+      reset(payload);
+      setImageFile(null);
+      setPreviewImage('');
+      setIsEditing(false);
+      toast.success('Profile updated successfully');
+    } catch  {
+      toast.error('Profile update failed. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
   if(loading || isLoading) {
     return <Loading></Loading>
   }
@@ -34,7 +178,18 @@ const Profile = () => {
              <div className="!mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 !px-4 sm:!px-6 lg:!px-8 !py-5 sm:!py-6">
               <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-4 sm:gap-5 lg:gap-7">
                 <div className="shrink-0">
-                  <img src={profileInfo?.photourl} alt="Profile" className="w-32 h-32 sm:w-40 sm:h-40 lg:w-44 lg:h-44 rounded-full object-cover border-2 border-primary/25 shadow-sm" />
+                  <img src={isEditing && previewImage ? previewImage : profileInfo?.photourl} alt="Profile" className="w-32 h-32 sm:w-40 sm:h-40 lg:w-44 lg:h-44 rounded-full object-cover border-2 border-primary/25 shadow-sm" />
+                  {isEditing && (
+                    <label className="btn btn-outline !mt-3 !px-3 !py-1.5 text-xs sm:text-sm w-full cursor-pointer">
+                      Change Picture
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
                 <div className='w-full md:flex-1 flex flex-col justify-center items-center md:items-start text-center md:text-left gap-1.5'>
                   
@@ -49,7 +204,7 @@ const Profile = () => {
   <Mail size={16} className='text-slate-400 shrink-0' />
   <span>{profileInfo?.email}</span>
 </h4>
-<button type='button' className='btn btn-primary !mt-2 !px-5 !py-2 text-sm sm:text-base'>Edit Profile</button>
+{!isEditing && <button onClick={startEditing} type='button' className='btn btn-primary !mt-2 !px-5 !py-2 text-sm sm:text-base'>Edit Profile</button>}
                 </div>
                    
 
@@ -57,181 +212,96 @@ const Profile = () => {
 
 
               </div>
+    <ProfileStatsCards profileInfo={profileInfo} />
+              <div className="!mt-6 bg-white rounded-2xl shadow-sm border border-slate-200 !px-4 sm:!px-6 lg:!px-8 !py-5 sm:!py-6">
+                <div className="flex items-center gap-2">
+                  <User size={21} className='text-primary'/>
+                  <h2 className="text-lg font-semibold text-slate-900">Personal Information</h2>
+                </div>
 
-            <div className="!mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 h-full gap-4 lg:gap-5">
-                    <div className="bg-white flex justify-between rounded-xl shadow-sm border border-gray-200 !p-4 !py-7">
-                        <div className='flex flex-col  gap-2'>
-                            <h2 className='text-gray-600'>Total Pending Amount</h2>
-                            <p className="text-2xl font-bold text-gray-800"></p>
-                        </div>
-                         <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
-                
-                <Receipt size={20} />
-            </div> </span>
+                <form onSubmit={handleSubmit(saveProfile)} className="!mt-5 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium text-slate-700">Full Name</span>
+                    <input
+                      type="text"
+                      disabled={!isEditing}
+                      {...register('name')}
+                      className="h-11 rounded-xl border border-slate-300 bg-slate-50 !px-3 text-slate-800 outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                    />
+                  </label>
 
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium text-slate-700">Email Address</span>
+                    <input
+                      type="email"
+                      disabled="true"
+                      {...register('email')}
+                      className="h-11 rounded-xl border border-slate-300 bg-slate-50 !px-3 text-slate-800 outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                    />
+                  </label>
 
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium text-slate-700">Designation</span>
+                    <select
+                      disabled={!isEditing}
+                      {...register('designation', {
+                        onChange: () => setValue('department', '')
+                      })}
+                      className="h-11 rounded-xl border border-slate-300 bg-slate-50 !px-3 text-slate-800 outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                    >
+                      <option value="">Select your Designation</option>
+                      <option value="teacher">Teacher</option>
+                      <option value="officer">Officer</option>
+                      <option value="staff">Staff</option>
+                    </select>
+                  </label>
 
-                    </div>
-                       <div className="bg-white flex justify-between rounded-xl shadow-sm border border-gray-200 !p-4 !py-7">
-                        <div className='flex flex-col  gap-2'>
-                            <h2 className='text-gray-600'>No. of Pending Payments</h2>
-                            <p className="text-2xl font-bold text-gray-800">hds</p>
-                        </div>
-                         <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
-                
-                <FileText size={20} />
-            </div> </span>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium text-slate-700">Department</span>
+                    {!isEditing ? (
+                      <input
+                        type="text"
+                        readOnly
+                        value={departmentValue || profileInfo?.department || ''}
+                        className="h-11 rounded-xl border border-slate-300 !px-3 outline-none bg-slate-100 text-slate-500"
+                      />
+                    ) : (
+                      <select
+                        disabled={!designationValue}
+                        {...register('department')}
+                        className="h-11 rounded-xl border border-slate-300 !px-3 outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 bg-slate-50 text-slate-800"
+                      >
+                        <option value="">Select your Department/Section</option>
+                        {entities?.map((entity) => (
+                          <option key={entity._id} value={entity.name}>{entity.name}</option>
+                        ))}
+                      </select>
+                    )}
+                  </label>
 
-
-
-                    </div>
-                      <div className="bg-white flex justify-between rounded-xl shadow-sm border border-gray-200 !p-4 !py-7">
-                        <div className='flex flex-col  gap-2'>
-                            <h2 className='text-gray-600'>Last Pending Payments</h2>
-                           <p className="text-2xl font-bold text-gray-800">hdj</p>
-                        </div>
-                         <span className="text-2xl font-bold  flex items-center gap-2"> <div className="text-primary !p-4 rounded-2xl bg-[#E9E7F7]">
-                
-                <Clock size={20} />
-            </div> </span>
-
-
-
-                    </div>
-                    </div>
-
-
-              </div>
-              {/* <div className={`w-full bg-white rounded-xl shadow-sm border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4 !mt-6 !px-3 sm:!px-4 lg:!px-6 !py-6 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
-   <div className='relative flex-1'>
-            <Search size={16} className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400' />
-            <input
-              type="text"
-              placeholder="Search product or service..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-          
-              className="rounded-lg w-full bg-gray-100 border border-gray-300 !pl-8 !py-2.5"
-            />
-          </div>
-           
-            <div className='flex flex-col gap-1 items-start '>
-            
-            <select {...register("category")} value={category} onChange={e => setCategory(e.target.value)} className="rounded-lg w-full bg-gray-100 border border-gray-300 !pl-2 !py-2.5">
-                
-            <option value="" className='text-black'>All</option>
-                <option value="service" className='text-black'>Service</option>
-                 <option value="product" className='text-black'>Product</option>
-                  <option value="others" className='text-black'>Others</option>
-               
-            </select>
-           
-        </div>
-                    <div >
-            
-            <select {...register("sort")} value={sort} onChange={e => setSort(e.target.value)} className="rounded-lg w-full bg-gray-100 border border-gray-300 !pl-2 !py-2.5">
-                <option value="newest" className='text-black'>Date (Newest First)</option>
-                <option value="oldest" className='text-black'>Date (Oldest First)</option>
-                 <option value="high" className='text-black'>Amount (High to Low)</option>
-                  <option value="low" className='text-black'>Amount (Low to High)</option>
-               
-            </select>
-           
-        </div>
-
-              </div>
-                     <div className={`w-full bg-white !mt-8 rounded-xl shadow-sm border border-gray-200 flex flex-col !py-16 justify-center items-center gap-3 ${!hasPayments && !isFiltering ? "" : "hidden"}`}>
-                             <div className="!p-4 rounded-full opacity-80 bg-gray-200"><p> <FileText size={48} /></p></div>
-                                <h2 className="text-2xl font-bold text-gray-800">No Pending Payments</h2>
-                                          
-                                           <p className="text-gray-600 opacity-80 text-center">You currently have no pending tax payments.</p>
-                                           <Link to="/dashboard/tax-vatcalculator" className="btn btn-primary font-medium !mt-1 flex items-center  !px-4 !py-2 gap-1"><Calculator size={18} /> Calculate Tax & VAT</Link>
-                                           <div className="w-[90%] lg:w-[60%] !mx-auto flex justify-center !mt-3">
-  <div className="bg-[#E9E7F7] shadow-sm text-sm flex items-start gap-2 text-black !px-4 !py-4 rounded-xl">
-    <CircleAlert className="w-5 h-5 !mt-0.5" />
-    <span>
-      <span className="font-bold">Getting Started :</span>{" "}
-      To begin, calculate your tax and VAT using the Tax Calculator. Once calculated, you can proceed to make a secure payment.
-    </span>
-  </div>
-  
-</div>
-                                        
+                  <div className="md:col-span-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 !mt-1">
+                    <p className="text-xs sm:text-sm text-slate-500">
+                      {isEditing ? 'Review your changes before saving.' : 'Click Edit Profile to update your information.'}
+                    </p>
+                    {isEditing && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={cancelEditing}
+                          disabled={isSaving}
+                          className="btn !px-5 !py-2.5 text-sm sm:text-base"
+                        >
+                          Cancel
+                        </button>
+                        <button type="submit" disabled={isSaving} className="btn btn-primary !px-5 !py-2.5 text-sm sm:text-base flex items-center justify-center gap-2"> <Save size={16} /> {isSaving ? 'Saving...' : 'Save Changes'}</button>
+                      </div>
+                    )}
                   </div>
-                  <div className={`overflow-x-auto !my-8 !mb-4 rounded-xl shadow-sm border border-gray-200 ${!hasPayments && !isFiltering ? "hidden" : ""}`}>
-        <table className="min-w-[900px] w-full text-sm text-left">
-          <thead>
-            <tr className="bg-primary text-white">
-             
-              <th className="!px-4 !py-4 font-semibold text-md">Payment ID</th>
-              <th className="!px-4 !py-4 font-semibold text-md">Date</th>
-              <th className="!px-4 !py-4 font-semibold text-md">Product/Service Name</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Type</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Base Amount</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">VAT </th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Tax </th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Payable Amount</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Action</th>
-            </tr>
-          </thead>
-        <tbody className="bg-white divide-y divide-gray-100">
+                </form>
+              </div>
 
-  {isFetching || isLoading ? (
-    <tr>
-      <td colSpan={9} className="!px-4 !py-10 text-center text-gray-400">
-        Updating...
-      </td>
-    </tr>
-  ) : pendingPayments?.length > 0 ? (
-
-    pendingPayments.map((item, i) => (
-      <tr key={item.id} className="hover:bg-indigo-50/40 transition-colors">
-       
-        <td className="!px-4 !py-5 text-center">{item.id}</td>
-        <td className="!px-4 !py-5 text-center whitespace-nowrap">
-          {formatDate(item.createdAt)}
-        </td>
-        <td className="!px-4 !py-5 text-center">{item.name}</td>
-
-        <td className="!px-4 !py-5 text-center">{item.category}</td>
-        <td className="!px-4 !py-5 text-center font-semibold">{item.baseAmount}</td>
-        <td className="!px-4 !py-5 text-center">{item.vatAmount}</td>
-        <td className="!px-4 !py-5 text-center">{item.taxAmount}</td>
-        <td className="!px-4 !py-5 text-center font-semibold">{item.totalAmount}</td>
-
-        <td className="!px-4 !py-5 text-center">
-          <div className="flex flex-wrap justify-center gap-2">
-            <Link to={`/payment/${item.id}`} className="btn btn-primary text-sm !px-3 !py-2 whitespace-nowrap">
-              Payment
-            </Link>
-            <button onClick={() => deletePending(item.id)} className="btn btn-outline bg-white hover:bg-red-500 hover:text-white border border-red-400 text-sm !px-3 !py-2 whitespace-nowrap">
-              Delete
-            </button>
-          </div>
-        </td>
-      </tr>
-    ))
-
-  ) : (
-    <tr>
-      <td colSpan={10} className="!px-4 !py-10 text-center text-gray-400">
-        No results found
-      </td>
-    </tr>
-  )}
-
-</tbody>
-        </table>
-      </div> */}
-      {/* <div className="!mx-auto flex justify-center !mt-3">
-      <div className="bg-white shadow-sm border border-gray-200 text-sm flex items-start gap-2 text-black !px-4 !py-3 !mt-4 rounded-xl">
-        <CircleAlert className="w-5 h-5 !mt-0.5" />
-        <span>
-          <span className="font-bold">Important Notice:</span>{" "}
-      Outstanding payments are displayed here All dues must be cleared within the prescribed timeframe to avoid late fees, penalties, or any administrative restrictions in accordance with institutional regulations. </span>
-      </div>
-    </div> */}
+              <AccountStatusCards profileInfo={profileInfo} user={user} />
+              
 
       </div>
         </section>

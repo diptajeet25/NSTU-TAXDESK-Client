@@ -1,14 +1,15 @@
-import { CircleAlert, Shield } from 'lucide-react';
-import React from 'react'
+import { CircleAlert, RefreshCw, Shield } from 'lucide-react';
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 
 const Pin = ({finalMethod, phone, paymentData, setStep}) => {
     const { register, handleSubmit, formState: { errors }} = useForm();
     const axiosSecure=useAxiosSecure();
+  const [load,setLoad]=useState(false);
     const handlepin=async(data)=>
     {
-        console.log(data.pin);
+    setLoad(true);
         const paymentInfo={
             status:"Paid",
             method:finalMethod,
@@ -16,11 +17,12 @@ const Pin = ({finalMethod, phone, paymentData, setStep}) => {
             paidAt:new Date(),
 
         }
-        const res=await axiosSecure.patch(`/payment?id=${paymentData.id}`,paymentInfo)
-        console.log(res.data);
-       
-
-        setStep(5);
+        try {
+          const res=await axiosSecure.patch(`/payment?id=${paymentData.id}`,paymentInfo)
+          setStep(5);
+        } finally {
+          setLoad(false);
+        }
 
     }
  
@@ -53,7 +55,7 @@ const Pin = ({finalMethod, phone, paymentData, setStep}) => {
        {errors.pin && <p className="text-red-500 text-sm mt-1">{errors.pin.message}</p>}
 
           </div>
-           <button type="submit" className="btn btn-primary w-full sm:w-[80%] !px-6 !py-3 !mx-auto">Proceed to Pay</button>
+           <button type="submit" disabled={load} aria-busy={load} className="btn btn-primary w-full sm:w-[80%] !px-6 !py-3 !mx-auto">{load ? <RefreshCw className="animate-spin" /> : null}{load ? "Processing..." : "Proceed to Pay"}</button>
 
             </form>
             </div>

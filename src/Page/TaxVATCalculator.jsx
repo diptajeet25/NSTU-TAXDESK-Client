@@ -6,10 +6,14 @@ import { useForm, useWatch } from 'react-hook-form'
 import { AuthContext } from '../Context/AuthContext'
 import { useNavigate } from 'react-router'
 import Loading from '../components/Loading'
+import toast from 'react-hot-toast'
 
 const TaxVATCalculator = () => {
   const axiosSecure=useAxiosSecure();
   const {user,loading}=useContext(AuthContext);
+  const [load,setLoad]=useState(false);
+  const [isSavingPending,setIsSavingPending]=useState(false);
+  const [isProceedingToPayment,setIsProceedingToPayment]=useState(false);
   const navigate=useNavigate()
   const [calculatedResult,setCalculatedResult]=useState(null);
   const {register, handleSubmit,setValue,reset,control, formState: { errors }} = useForm({defaultValues: {
@@ -44,24 +48,30 @@ const TaxVATCalculator = () => {
     setValue("taxRate", seletedTax.incomeTaxRate)
   }
   },[seletedTax, setValue])
-  const taxCalculator=(data)=>
+  const taxCalculator=async(data)=>
   {
-    console.log(data);
-    const vatAmount=(data.baseAmount*parseInt(data.vatRate))/100;
-    const taxAmount=(data.baseAmount*parseInt(data.taxRate))/100;
-    const totalAmount=parseFloat(vatAmount+taxAmount);
-    const calculatedResult={
-      name:data.name,
-      category:data.category,
-      baseAmount:data.baseAmount,
-      vatRate:data.vatRate,
-      taxRate:data.taxRate,
-      taxAmount:taxAmount,
-      vatAmount:vatAmount,
-      totalAmount:totalAmount
+    setLoad(true);
+    try {
+      await axiosSecure.patch(`/updateCalculationCount?email=${user?.email}`)
+
+      const vatAmount=(data.baseAmount*parseInt(data.vatRate))/100;
+      const taxAmount=(data.baseAmount*parseInt(data.taxRate))/100;
+      const totalAmount=parseFloat(vatAmount+taxAmount);
+      const calculatedResult={
+        name:data.name,
+        category:data.category,
+        baseAmount:data.baseAmount,
+        vatRate:data.vatRate,
+        taxRate:data.taxRate,
+        taxAmount:taxAmount,
+        vatAmount:vatAmount,
+        totalAmount:totalAmount
+      }
+      setCalculatedResult(calculatedResult);
+    } finally {
+      setLoad(false);
     }
-    setCalculatedResult(calculatedResult);
-    console.log(calculatedResult);
+  
       }
     const resetFun=()=>{
         reset({
@@ -78,6 +88,8 @@ const TaxVATCalculator = () => {
 
   const pendingPayments=async()=>
   {
+    if (isSavingPending || isProceedingToPayment) return;
+    setIsSavingPending(true);
     const pendingData={
       id:`TXN${new Date().getFullYear()}${new Date().getMonth() + 1}${new Date().getDate()}${Math.floor(Math.random() * 10000)}`,
       name: calculatedResult.name,
@@ -92,21 +104,27 @@ const TaxVATCalculator = () => {
       userEmail:user?.email,
       createdAt: new Date()
     }
-  
- 
-   const res=await axiosSecure.post('/payments',pendingData)
-    if(res.data.insertedId)
-    {
-     
-  resetFun();
-     
-    }
-    else{
-      alert("Failed to save pending payment. Please try again.");
+
+    try {
+      const res=await axiosSecure.post('/payments',pendingData)
+      if(res.data.insertedId)
+      {
+        toast.success("Saved as pending successfully.");
+        resetFun();
+      }
+      else{
+        toast.error("Failed to save pending payment. Please try again.");
+      }
+    } catch {
+      toast.error("Failed to save pending payment. Please try again.");
+    } finally {
+      setIsSavingPending(false);
     }
   }
   const PaymentRedirect=async()=>
   {
+   if (isSavingPending || isProceedingToPayment) return;
+   setIsProceedingToPayment(true);
    const pendingData={
       id:`TXN${new Date().getFullYear()}${new Date().getMonth() + 1}${new Date().getDate()}${Math.floor(Math.random() * 10000)}`,
       name: calculatedResult.name,
@@ -121,9 +139,12 @@ const TaxVATCalculator = () => {
       userEmail:user?.email,
       createdAt: new Date()
     }
-    const res=await axiosSecure.post('/payments',pendingData)
-    console.log(res);
-    navigate(`/payment/${pendingData.id}`);
+    try {
+      await axiosSecure.post('/payments',pendingData)
+      navigate(`/payment/${pendingData.id}`);
+    } finally {
+      setIsProceedingToPayment(false);
+    }
 
   
   }
@@ -198,7 +219,10 @@ const TaxVATCalculator = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 w-full !pt-2">
-              <button type="submit" className="btn btn-primary sm:flex-1"><Calculator size={20} /> Calculate</button>
+              <button type="submit" disabled={load} className="btn btn-primary sm:flex-1" aria-busy={load}>
+                {load ? <RefreshCw size={20} className="animate-spin" /> : <Calculator size={20} />}
+                {load ? "Calculating..." : "Calculate"}
+              </button>
               <button type="button" onClick={resetFun} className="btn btn-outline btn-primary sm:w-36"><RefreshCw size={20} /> Reset</button>
             </div>
           </form>
@@ -240,10 +264,16 @@ const TaxVATCalculator = () => {
               </div>
 
               <div className="flex flex-col gap-4 !mt-6">
-                <button onClick={PaymentRedirect} className="w-full btn btn-primary !py-4 text-md font-bold"><CreditCard size={20} /> Proceed to Payment</button>
+                <button onClick={PaymentRedirect} disabled={isProceedingToPayment || isSavingPending} className="w-full btn btn-primary !py-4 text-md font-bold" aria-busy={isProceedingToPayment}>
+                  {isProceedingToPayment ? <RefreshCw size={20} className="animate-spin" /> : <CreditCard size={20} />}
+                  {isProceedingToPayment ? "Processing..." : "Proceed to Payment"}
+                </button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <button onClick={pendingPayments} className="btn w-full btn-primary btn-outline !py-4 text-md font-bold"><Save size={20} />Save as Pending</button>
-                  <button onClick={resetFun} className="btn w-full btn-outline !py-4 text-md font-bold"><X size={20} />Cancel</button>
+                  <button onClick={pendingPayments} disabled={isSavingPending || isProceedingToPayment} className="btn w-full btn-primary btn-outline !py-4 text-md font-bold" aria-busy={isSavingPending}>
+                    {isSavingPending ? <RefreshCw size={20} className="animate-spin" /> : <Save size={20} />}
+                    {isSavingPending ? "Saving..." : "Save as Pending"}
+                  </button>
+                  <button onClick={resetFun} disabled={isSavingPending || isProceedingToPayment} className="btn w-full btn-outline !py-4 text-md font-bold"><X size={20} />Cancel</button>
                 </div>
               </div>
             </div>

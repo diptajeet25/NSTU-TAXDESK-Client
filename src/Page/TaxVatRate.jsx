@@ -1,22 +1,17 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { Download, FileText, Search } from 'lucide-react'
 import useAxiosSecure from '../hooks/useAxiosSecure'
 import { useQuery } from '@tanstack/react-query'
-import Pdf from '../components/Pdf'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-
-
-
-
-
+import toast from 'react-hot-toast'
+import Loading from '../components/Loading'
 const TaxVatRate = () => {
   const [search, setSearch] = useState('')
   const axiosSecure=useAxiosSecure();
-  const pdfRef = useRef();
-  const {data:taxVatData=[]}=useQuery(
+  const {data:taxVatData=[], isLoading}=useQuery(
     {
       queryKey:['taxVatRates'],
       queryFn:async()=>
@@ -28,21 +23,23 @@ const TaxVatRate = () => {
     }
   )
 
+  const filtered = useMemo(() => {
+    const normalizedSearch = search.toLowerCase().trim()
 
-  const filtered = taxVatData.filter(item =>
-    item.name.toLowerCase().includes(search.toLowerCase()) ||
-    item.category.toLowerCase().includes(search.toLowerCase())
-  )
+    return taxVatData.filter(item =>
+      item.name?.toLowerCase().includes(normalizedSearch) ||
+      item.category?.toLowerCase().includes(normalizedSearch)
+    )
+  }, [search, taxVatData])
   
   const handleDownloadPDF = () => {
     try {
       if (filtered.length === 0) {
-        alert('No data to generate PDF. Please perform a search first.');
+        toast.error('No records found to export. Please search for a valid tax or VAT item first.');
         return;
       }
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
       let yPosition = 20;
       doc.setFontSize(18);
       doc.setTextColor(99, 102, 241); // Primary color
@@ -62,7 +59,7 @@ const TaxVatRate = () => {
       doc.setTextColor(107, 114, 128);
       doc.text(`Generated: ${currentDate}`, 20, yPosition);
       doc.text(`Total Records: ${filtered.length}`, pageWidth - 20, yPosition, { align: 'right' });
-      const tableData = filtered.map((item, index) => [
+      const tableData = filtered.map((item) => [
         item.id,
         item.name,
         item.category,
@@ -104,7 +101,7 @@ const TaxVatRate = () => {
           
         },
         margins: { left: 15, right: 15 },
-        didDrawPage: (data) => {
+        didDrawPage: () => {
           const footerY = doc.internal.pageSize.getHeight() - 5;
           doc.setFontSize(9);
           doc.setTextColor(156, 163, 175);
@@ -127,16 +124,20 @@ const TaxVatRate = () => {
       doc.save('tax-vat-rates.pdf');
     } catch (error) {
       console.error('PDF Error:', error);
-      alert('Failed to generate PDF: ' + error.message);
+      toast.error(`Failed to generate PDF. ${error?.message || 'Please try again.'}`);
     }
   };
+
+  if (isLoading) {
+    return <Loading />
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       <section className="!px-4 sm:!px-5 lg:!px-7 !py-6 lg:!py-8">
-        <div className="w-full max-w-7xl !mx-auto">
+        <div className="w-full max-w-7xl mx-auto">
           <div className='flex items-start sm:items-center justify-start gap-3 sm:gap-4'>
             <div className="text-primary rounded-2xl w-14 h-14 sm:w-16 sm:h-16 flex shrink-0 items-center justify-center !p-3 bg-[#E9E7F7]">
               <FileText size={30} />
@@ -167,50 +168,51 @@ const TaxVatRate = () => {
           </p>
 
           <div className="overflow-x-auto w-full !my-6 rounded-xl shadow-sm border border-gray-200 bg-white">
-            <table className="min-w-[900px] w-full text-sm text-left">
+            <table className="min-w-225 w-full text-sm text-left">
               <thead>
                 <tr className="bg-primary text-white">
-                  <th className="!px-6 !py-4 font-semibold text-base w-30">Serial No</th>
-                  <th className="!px-6 !py-4 font-semibold text-base">Product/Service Name</th>
-                  <th className="!px-6 !py-4 font-semibold text-base text-center">Type</th>
-                  <th className="!px-6 !py-4 font-semibold text-base text-center">VAT (%)</th>
-                  <th className="!px-6 !py-4 font-semibold text-base text-center">Tax (%)</th>
-                  <th className="!px-6 !py-4 font-semibold text-base text-center">Total Rate (%)</th>
+                  <th className="!px-3 !py-4 font-semibold text-md text-center">Serial No</th>
+                  <th className="!px-3 !py-4 font-semibold text-md text-center">Product/Service Name</th>
+                  <th className="!px-3 !py-4 font-semibold text-md text-center">Type</th>
+                  <th className="!px-3 !py-4 font-semibold text-md text-center">VAT (%)</th>
+                  <th className="!px-3 !py-4 font-semibold text-md text-center">Tax (%)</th>
+                  <th className="!px-3 !py-4 font-semibold text-md text-center">Total Rate (%)</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
                 {filtered.length > 0 ? filtered.map((item) => {
                   const isProduct = item.category?.toLowerCase() === 'product'
+                  const totalRate = (parseFloat(item.vatRate || 0) + parseFloat(item.incomeTaxRate || 0)).toFixed(2)
 
                   return (
                     <tr key={item.id} className="hover:bg-indigo-50/40 transition-colors">
-                      <td className="!px-6 !py-5 text-gray-600 font-medium">{item.id}</td>
-                      <td className="!px-6 !py-5 text-gray-800 font-medium">{item.name}</td>
-                      <td className="!px-6 !py-5 text-center">
+                      <td className="!px-3 !py-5 text-gray-600 font-medium text-center">{item.id}</td>
+                      <td className="!px-3 !py-5 text-gray-800 font-medium text-center">{item.name}</td>
+                      <td className="!px-3 !py-5 text-center">
                         <span className={`!px-3 !py-1 rounded-full text-xs font-semibold ${isProduct ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
                           {item.category}
                         </span>
                       </td>
-                      <td className="!px-6 !py-5 text-center">
-                        <span className="inline-block bg-blue-50 text-blue-500 font-semibold text-sm !px-4 !py-1.5 rounded-full min-w-[52px]">
+                      <td className="!px-3 !py-5 text-center">
+                        <span className="inline-block bg-blue-50 text-blue-500 font-semibold text-sm !px-4 !py-1.5 rounded-full min-w-13">
                           {item.vatRate}%
                         </span>
                       </td>
-                      <td className="!px-6 !py-5 text-center">
-                        <span className="inline-block bg-green-50 text-green-600 font-semibold text-sm !px-4 !py-1.5 rounded-full min-w-[52px]">
+                      <td className="!px-3 !py-5 text-center">
+                        <span className="inline-block bg-green-50 text-green-600 font-semibold text-sm !px-4 !py-1.5 rounded-full min-w-13">
                           {item.incomeTaxRate}%
                         </span>
                       </td>
-                      <td className="!px-6 !py-5 text-center">
-                        <span className="inline-block bg-purple-50 text-purple-500 font-semibold text-sm !px-4 !py-1.5 rounded-full min-w-[52px]">
-                          {parseFloat(item.vatRate) + parseFloat(item.incomeTaxRate)}%
+                      <td className="!px-3 !py-5 text-center">
+                        <span className="inline-block bg-purple-50 text-purple-500 font-semibold text-sm !px-4 !py-1.5 rounded-full min-w-13">
+                          {totalRate}%
                         </span>
                       </td>
                     </tr>
                   )
                 }) : (
                   <tr>
-                    <td colSpan={6} className="!px-6 !py-10 text-center text-gray-400">
+                    <td colSpan={6} className="!px-3 !py-10 text-center text-gray-400">
                       No results found for &quot;{search}&quot;
                     </td>
                   </tr>
@@ -235,11 +237,6 @@ const TaxVatRate = () => {
       </section>
 
       <Footer />
-      <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
-  <div ref={pdfRef}>
-    <Pdf data={filtered} />
-  </div>
-</div>
     </div>
   )
 }

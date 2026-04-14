@@ -1,4 +1,4 @@
-import { CircleAlert, Eye, EyeOff, Shield } from 'lucide-react';
+import { CircleAlert, Eye, EyeOff, RefreshCw, Shield } from 'lucide-react';
 import React, { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { AuthContext } from '../Context/AuthContext';
@@ -7,7 +7,7 @@ import { auth } from '../Firebase/firebase.init';
 import { Link, useNavigate } from 'react-router';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
-import { last } from 'firebase/firestore/pipelines';
+import toast from 'react-hot-toast';
 
 const RegisterForm = () => {
     const {register,watch,resetField ,handleSubmit,getValues, formState: { errors }} = useForm();
@@ -16,17 +16,17 @@ const RegisterForm = () => {
   resetField("department"); 
 }, [designation]);
     const navigate=useNavigate();
-    const {user,setUser,createUser,userDetails,setUserDetails}=useContext(AuthContext);
+    const {setUser,createUser,userDetails,setUserDetails}=useContext(AuthContext);
       const [showPassword, setShowPassword] = useState(false);
+    const [load,setLoad]=useState(false);
 
       const [showConfirmPassword, setShowConfirmPassword] = useState(false);
       const axiosSecure=useAxiosSecure();
-      const registerUser = (data)=>{
-        console.log(data);
-        const photo=data.photo[0];
-        createUser(data.email,data.password)
-        .then(async()=>
-        {
+            const registerUser = async (data)=>{
+                setLoad(true);
+                try {
+                    const photo=data.photo[0];
+                    await createUser(data.email,data.password)
             setUser(auth.currentUser);
             const formdata=new FormData();
             formdata.append("image",photo);
@@ -36,17 +36,16 @@ const RegisterForm = () => {
                 body:formdata
             });
             const imageData=await res.json();            
-            console.log(imageData);
             const profile={
                 displayName:data.name,
                 photoURL:imageData.data.url
             }
             await updateProfile(auth.currentUser,profile)
-            console.log("Profile Updated");
             const userInfo={
                 name:data.name,
                 photourl:imageData.data.url,
                 email:data.email,
+                phone:data.phone,
                 designation:data.designation,
                 department:data.department,
                 role:"user",
@@ -56,16 +55,12 @@ const RegisterForm = () => {
                 lastLogin:new Date()
             }
             axiosSecure.post("/users",userInfo)
-            .then((res)=>
+            .then(()=>
             {
-                console.log(res.data);
             }).catch(error=>
-            {                console.log(error);
+            {
             });
-            
-            console.log(userInfo);
             setUserDetails(userInfo);
-            console.log(userDetails);
 
 
             await sendEmailVerification(auth.currentUser,{
@@ -74,16 +69,15 @@ const RegisterForm = () => {
             }
             );
             navigate("/verify-email");
-   
-    
-                
-                       
-                     
-            })
-    .catch(error=> 
-                {
-    console.log(error);
-                })
+                } catch (error) {
+                    if (error?.code === 'auth/email-already-in-use') {
+                        toast.error('This email is already registered. Please use another email or log in.');
+                    } else {
+                        toast.error('Registration failed. Please try again.');
+                    }
+                } finally {
+                    setLoad(false);
+                }
           }
           const {data:entities}=useQuery(
             {
@@ -91,7 +85,6 @@ const RegisterForm = () => {
                 enabled:!!designation,
                 queryFn:async()=>{
                     const res=await axiosSecure.get(`/entities?designation=${designation}`);
-                    console.log(res.data);
                     return res.data;
             }
         }
@@ -115,6 +108,11 @@ const RegisterForm = () => {
             <label className="font-bold !px-1">Email</label>
             <input type="text" placeholder="Enter your Email Address" {...register("email", { required: "Email is required" })} className="rounded-lg w-[95%] bg-gray-200 border-black/10 !pl-2 !py-2"></input>
             {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+        </div>
+         <div className='flex flex-col gap-1 items-start w-full '>
+            <label className="font-bold !px-1">Phone</label>
+            <input type="text" placeholder="Enter your Phone Number" {...register("phone", { required: "Phone is required" })} className="rounded-lg w-[95%] bg-gray-200 border-black/10 !pl-2 !py-2"></input>
+            {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
         </div>
         <div className='flex flex-col gap-1 items-start w-full'>
             <label className="font-bold !px-1">Photo</label>
@@ -179,7 +177,10 @@ const RegisterForm = () => {
             {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>}
 
         </div>
-        <button type="submit" className="bg-primary text-white rounded-lg w-[95%] !py-2 !mt-2">Create Account</button>
+                <button type="submit" disabled={load} aria-busy={load} className="bg-primary text-white rounded-lg w-[95%] !py-2 !mt-2 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                    {load && <RefreshCw size={18} className="animate-spin" />}
+                    {load ? "Creating Account..." : "Create Account"}
+                </button>
         <span className="text-sm text-gray-600 text-center">Already have an account? <Link to="/auth/login" className="text-primary font-bold">Login here</Link></span>
 
         </form>

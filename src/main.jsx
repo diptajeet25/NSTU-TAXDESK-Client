@@ -22,6 +22,7 @@ import PaymentHistory from './Page/PaymentHistory.jsx';
 import AdminDashBoard from './Page/AdminDashBoard.jsx';
 import Profile from './Page/Profile.jsx';
 import { Toaster } from 'react-hot-toast';
+import Receipt from './components/Receipt.jsx';
 
 document.documentElement.setAttribute('data-theme', 'light');
 
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
       }
       
     ]
+  },
+  {
+    path:"Receipt/:id",
+    element:<Receipt></Receipt>
   },
   {
     path:"/tax-vat-rates",

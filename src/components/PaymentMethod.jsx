@@ -26,8 +26,6 @@ const PaymentMethod = ({finalMethod,setFinalMethod,step,setStep }) => {
     {
         setFinalMethod(method);
         setStep(2);
-        console.log(finalMethod,step);
-        
     }
   return (
     <div className="flex flex-col justify-center gap-4 w-full max-w-4xl !mx-auto !mt-6 sm:!mt-8 lg:!mt-10 bg-white rounded-2xl border border-gray-200 shadow-sm !mb-8 sm:!mb-10 !p-4 sm:!p-6">

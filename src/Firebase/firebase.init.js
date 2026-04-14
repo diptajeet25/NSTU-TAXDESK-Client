@@ -6,12 +6,12 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCl11NATToXG53tkyVM-x--udahM3Kx2WM",
-  authDomain: "nstu-taxdesk.firebaseapp.com",
-  projectId: "nstu-taxdesk",
-  storageBucket: "nstu-taxdesk.firebasestorage.app",
-  messagingSenderId: "869450764108",
-  appId: "1:869450764108:web:137a14bc8e0421d062c9e9"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase

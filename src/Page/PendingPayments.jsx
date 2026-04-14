@@ -22,12 +22,11 @@ const PendingPayments = () => {
 
   return `${day}-${month}-${year}`;
 };
-const { data: pendingStats } = useQuery({
+const { data: pendingStats, refetch: refetchStats } = useQuery({
     queryKey: ["pendingStats", user?.email],
     enabled: !loading && !!user?.email,
     queryFn: async () => {
         const res = await axiosSecure.get(`/pending-payments/stats?email=${user?.email}`);
-        console.log(res.data.lastpending[0].createdAt);
         return res.data;
     }
 });
@@ -38,13 +37,12 @@ const { data: pendingStats } = useQuery({
     const [category,setCategory]=useState('');
     const [sort,setSort]=useState('newest');
     const { register,   } = useForm();
-    const {data:pendingPayments, isLoading,isFetching} = useQuery({
+    const {data:pendingPayments, isLoading,isFetching,refetch} = useQuery({
         queryKey:["pendingPayments",search,category,sort],
         enabled: !loading && !!user?.email,
         keepPreviousData: true,
         queryFn: async () => {
             const res=await axiosSecure.get(`/pending-payments?email=${user?.email}&search=${search}&category=${category}&sort=${sort}`);
-            console.log(res.data);
             return res.data;
         }
     })
@@ -52,9 +50,6 @@ const { data: pendingStats } = useQuery({
 
     const deletePending=async(id)=>
     {
-
-      console.log(id);
-
 const swalWithBootstrapButtons = Swal.mixin({
   customClass: {
     confirmButton: "btn btn-success  !px-3 !py-2 !mx-2",
@@ -82,6 +77,8 @@ swalWithBootstrapButtons.fire({
     text: "Your file has been deleted.",
     icon: "success"
   });
+  refetch();
+  refetchStats();
     }
   }
   else if (result.dismiss === Swal.DismissReason.cancel) swalWithBootstrapButtons.fire({
@@ -215,15 +212,15 @@ const isFiltering = search || category;
           <thead>
             <tr className="bg-primary text-white">
              
-              <th className="!px-4 !py-4 font-semibold text-md">Payment ID</th>
-              <th className="!px-4 !py-4 font-semibold text-md">Date</th>
-              <th className="!px-4 !py-4 font-semibold text-md">Product/Service Name</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Type</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Base Amount</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">VAT </th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Tax </th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Payable Amount</th>
-              <th className="!px-4 !py-4 font-semibold text-md text-center">Action</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Payment ID</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Date</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Product/Service Name</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Type</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Base Amount</th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">VAT </th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Tax </th>
+              <th className="!px-3 !py-4 font-semibold text-md text-center">Payable Amount</th>
+              <th className="!px-3 !py-2 font-semibold text-md text-center">Action</th>
             </tr>
           </thead>
         <tbody className="bg-white divide-y divide-gray-100">
@@ -239,19 +236,19 @@ const isFiltering = search || category;
     pendingPayments.map((item, i) => (
       <tr key={item.id} className="hover:bg-indigo-50/40 transition-colors">
        
-        <td className="!px-4 !py-5 text-center">{item.id}</td>
-        <td className="!px-4 !py-5 text-center whitespace-nowrap">
+        <td className="!px-3 !py-5 text-center">{item.id}</td>
+        <td className="!px-3 !py-5 text-center whitespace-nowrap">
           {formatDate(item.createdAt)}
         </td>
-        <td className="!px-4 !py-5 text-center">{item.name}</td>
+        <td className="!px-3 !py-5 text-center">{item.name}</td>
 
-        <td className="!px-4 !py-5 text-center">{item.category}</td>
-        <td className="!px-4 !py-5 text-center font-semibold">{item.baseAmount}</td>
-        <td className="!px-4 !py-5 text-center">{item.vatAmount}</td>
-        <td className="!px-4 !py-5 text-center">{item.taxAmount}</td>
-        <td className="!px-4 !py-5 text-center font-semibold">{item.totalAmount}</td>
+        <td className="!px-3 !py-5 text-center">{item.category}</td>
+        <td className="!px-3 !py-5 text-center font-semibold">{item.baseAmount}</td>
+        <td className="!px-3 !py-5 text-center">{item.vatAmount}</td>
+        <td className="!px-3 !py-5 text-center">{item.taxAmount}</td>
+        <td className="!px-3 !py-5 text-center font-semibold">{item.totalAmount}</td>
 
-        <td className="!px-4 !py-5 text-center">
+        <td className="!px-3 !py-5 text-center">
           <div className="flex flex-wrap justify-center gap-2">
             <Link to={`/payment/${item.id}`} className="btn btn-primary text-sm !px-3 !py-2 whitespace-nowrap">
               Payment
